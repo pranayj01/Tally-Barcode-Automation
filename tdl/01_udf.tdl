@@ -1,17 +1,17 @@
 ;; ============================================================================
-;; 01_udf.tdl — Company sequence UDFs ONLY
+;; 01_udf.tdl — Company sequence + Stock Item print preference
 ;;
-;; ARCHITECTURE (FINAL):
-;;   Stock Item barcode storage = native Alias field ONLY.
-;;   No Stock Item barcode UDFs. No manufacturer barcode. No internal barcode UDF.
+;; ARCHITECTURE:
+;;   Barcode storage = native Stock Item Alias ONLY.
+;;   JGLabelsToPrint = manual override for Stock Item reprint count
+;;   (editable on master in Create/Alter — not a Display popup).
 ;;
-;; These Company UDFs track the running sequence used to GENERATE alias values.
-;; They do not store barcodes on items.
-;;
-;; Indexes 21100–21102 reserved for JG Barcode Add-on (company sequence)
+;; Indexes 21100–21103 reserved for JG Barcode Add-on
 ;; ============================================================================
 
 [System: UDF]
     JGNextSeq       : Number : 21100
     JGHighestIssued : Number : 21101
     JGSequenceYear  : Number : 21102
+    ;; Stock Item: how many labels when reprinting from master
+    JGLabelsToPrint : Number : 21103

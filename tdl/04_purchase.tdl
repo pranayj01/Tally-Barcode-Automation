@@ -1,23 +1,27 @@
 ;; ============================================================================
-;; 04_purchase.tdl — MINIMAL SCOPE + company sequence
+;; 04_purchase.tdl — Purchase → Alias + optional label print
 ;;
 ;; On Purchase Form Accept:
-;;   Walk Inventory Entries
-;;   If Stock Item $$Alias is empty → assign next 7-digit sequence (0000001, 0000002, …)
-;;   Store next counter on Company UDF JGNextSeq (01_udf.tdl)
-;;   Never overwrite existing Alias
+;;   1. Walk Inventory Entries — ensure Alias (never overwrite)
+;;   2. Query Box: Print Barcode Labels?
+;;   3. If Yes: for each inventory line, Print Report : JGLabelReport
+;;      with ##JGPrintCopies = BilledQty (one label per unit received)
 ;;
-;; No year / prefix / initials.
-;;
-;; LIVE-VERIFIED write: Insert Collection Object : Name + Set Value : Name + Accept Alter
+;; Label layout remains Modules 07/08 (fixed 3-col A4).
+;; Stock Item master "Labels to Print" is for reprint only (Module 06).
 ;; ============================================================================
 
 [System: Variable]
-    JGAliasItemName : String
+    JGAliasItemName      : String
+    JGPrintLabelsChoice  : Logical
 
 [Variable: JGAliasItemName]
     Type    : String
     Default : ""
+
+[Variable: JGPrintLabelsChoice]
+    Type    : Logical
+    Default : No
 
 [Collection: JGStockItemByNameColl]
     Type   : Stock Item
@@ -86,6 +90,24 @@
     13 : Set Value : Name : ##Code
     14 : Accept Alter
 
+[Function: JGPurcPrintLabelsFromQty]
+    ;; One Print Report per inventory line; copies = BilledQty (clamped in 06).
+    Variable : ItemName : String
+    Variable : Qty      : Number
+    01 : Walk Collection : Inventory Entries
+    02 :   Set : ItemName : $StockItemName
+    03 :   IF : NOT $$IsEmpty:##ItemName
+    04 :     Set : Qty : $$Number:$BilledQty
+    05 :     IF : ##Qty < 1
+    06 :       Set : Qty : 1
+    07 :     ENDIF
+    08 :     Call : JGLoadItemPrintPayload : ##ItemName : ##Qty
+    09 :     IF : $$LastResult
+    10 :       Print Report : JGLabelReport
+    11 :     ENDIF
+    12 :   ENDIF
+    13 : End Walk
+
 [Function: JGPurcOnAccept]
     Variable : ItemName : String
     01 : IF : NOT $$IsPurchase:$VoucherTypeName
@@ -99,7 +121,12 @@
     09 :     Call : JGPurcSetAliasIfEmpty : ##ItemName
     10 :   ENDIF
     11 : End Walk
-    12 : RETURN : Yes
+    12 : Set : JGPrintLabelsChoice : No
+    13 : Query Box : "Print Barcode Labels?" : JGPrintLabelsChoice
+    14 : IF : ##JGPrintLabelsChoice
+    15 :   Call : JGPurcPrintLabelsFromQty
+    16 : ENDIF
+    17 : RETURN : Yes
 
 [#Form: Voucher]
     On : Form Accept : Yes : Call : JGPurcOnAccept

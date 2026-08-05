@@ -1,8 +1,15 @@
 ;; ============================================================================
-;; 06_print_engine.tdl — launcher (no Display before print)
+;; 06_print_engine.tdl — Stock Item reprint launcher (no popup)
 ;;
-;; Sticker mm sizes are HARDCODED in Module 08 for now (Safe IF/THEN mm
-;; formulas caused Bad formula!). Copies/start-from Sets remain here.
+;; Workflow A — Single item reprint:
+;;   Edit "Labels to Print" on Stock Item master (Create/Alter + Storage)
+;;   Ctrl+Alt+B → read that UDF → Print Report : JGLabelReport
+;;
+;; No Display config Report. No copies popup.
+;; Layout still driven by ##JGPrintCopies (Module 08).
+;;
+;; Purchase qty printing lives in 04_purchase.tdl (calls JGLoadItemPrintPayload
+;; and Print Report : JGLabelReport).
 ;; ============================================================================
 
 [System: Variable]
@@ -10,16 +17,7 @@
     JGPrintItemName   : String
     JGPrintMRP        : String
     JGPrintRate       : String
-    JGLabelsToPrint   : Number
-    JGStartFromLabel  : Number
-    JGLabelsPerRow    : Number
-    JGSetLabelWidth   : Number
-    JGSetLabelHeight  : Number
-    JGSetGapX         : Number
-    JGSetGapY         : Number
-    JGSetMarginTop    : Number
-    JGSetMarginLeft   : Number
-    JGSetBarcodeHt    : Number
+    JGPrintCopies     : Number
 
 [Variable: JGPrintAlias]
     Type    : String
@@ -37,113 +35,103 @@
     Type    : String
     Default : ""
 
-[Variable: JGLabelsToPrint]
-    Type    : Number
-    Default : 15
-
-[Variable: JGStartFromLabel]
+[Variable: JGPrintCopies]
     Type    : Number
     Default : 1
 
-[Variable: JGLabelsPerRow]
-    Type    : Number
-    Default : 3
+;; ---- Stock Item master: Labels to Print (manual override) ----
 
-[Variable: JGSetLabelWidth]
-    Type    : Number
-    Default : 60
+[Part: JG SI Labels To Print Part]
+    Lines    : JG SI Labels To Print Line
+    Vertical : Yes
 
-[Variable: JGSetLabelHeight]
-    Type    : Number
-    Default : 40
+[Line: JG SI Labels To Print Line]
+    Fields : JG SI Labels To Print Lbl, JG SI Labels To Print Fld
 
-[Variable: JGSetGapX]
-    Type    : Number
-    Default : 3
+[Field: JG SI Labels To Print Lbl]
+    Use    : Name Field
+    Set As : "Labels to Print"
+    Width  : 18
+    Style  : Normal Bold
+    Skip   : Yes
 
-[Variable: JGSetGapY]
-    Type    : Number
-    Default : 3
+[Field: JG SI Labels To Print Fld]
+    Use      : Number Field
+    Storage  : JGLabelsToPrint
+    Width    : 8
+    Validate : ($$IsEmpty:$$Value) OR (($$Number:$$Value >= 1) AND ($$Number:$$Value <= 100))
 
-[Variable: JGSetMarginTop]
-    Type    : Number
-    Default : 5
-
-[Variable: JGSetMarginLeft]
-    Type    : Number
-    Default : 5
-
-[Variable: JGSetBarcodeHt]
-    Type    : Number
-    Default : 28
+[#Form: Stock Item]
+    Add : Part    : JG SI Labels To Print Part
+    Add : Buttons : JGPrintBarcodeBtn
 
 [Button: JGPrintBarcodeBtn]
     Title  : "Print Barcode"
     Key    : Ctrl + Alt + B
     Action : Call : JGPrintBarcodeStart
 
-[#Form: Stock Item]
-    Add : Buttons : JGPrintBarcodeBtn
+;; ---- Shared payload loader (Stock Item reprint + Purchase) ----
 
-;; Clamp layout vars before Print Report (Defaults alone are NOT trusted at preview)
-[Function: JGClampLayoutVars]
-    01 : IF : $$Number:##JGSetLabelWidth < 1
-    02 :   Set : JGSetLabelWidth : 60
+[Function: JGClampPrintCopies]
+    Parameter : pCopies : Number
+    Variable  : N : Number
+    01 : Set : N : $$Number:##pCopies
+    02 : IF : ##N < 1
+    03 :   Set : N : 1
+    04 : ENDIF
+    05 : IF : ##N > 100
+    06 :   Set : N : 100
+    07 : ENDIF
+    08 : Set : JGPrintCopies : ##N
+    09 : RETURN : ##N
+
+[Function: JGLoadItemPrintPayload]
+    ;; Load one Stock Item into print variables. pCopies = label count for Module 08.
+    ;; Alias via JGPurcGetAlias (04) — Walk Collection + $$Alias (live-verified).
+    Parameter : pItem : String
+    Parameter : pCopies : Number
+    Variable  : Code : String
+    Variable  : Mrp  : String
+    Variable  : Rate : String
+    01 : IF : $$IsEmpty:##pItem
+    02 :   RETURN : No
     03 : ENDIF
-    04 : IF : $$Number:##JGSetLabelHeight < 1
-    05 :   Set : JGSetLabelHeight : 40
-    06 : ENDIF
-    07 : IF : $$Number:##JGLabelsPerRow < 1
-    08 :   Set : JGLabelsPerRow : 3
-    09 : ENDIF
-    10 : IF : $$Number:##JGSetGapX < 0
-    11 :   Set : JGSetGapX : 3
-    12 : ENDIF
-    13 : IF : $$Number:##JGSetGapY < 0
-    14 :   Set : JGSetGapY : 3
-    15 : ENDIF
-    16 : IF : $$Number:##JGSetMarginTop < 0
-    17 :   Set : JGSetMarginTop : 5
-    18 : ENDIF
-    19 : IF : $$Number:##JGSetMarginLeft < 0
-    20 :   Set : JGSetMarginLeft : 5
-    21 : ENDIF
-    22 : IF : $$Number:##JGSetBarcodeHt < 1
-    23 :   Set : JGSetBarcodeHt : 28
-    24 : ENDIF
-    25 : IF : $$Number:##JGLabelsToPrint < 1
-    26 :   Set : JGLabelsToPrint : 1
-    27 : ENDIF
-    28 : IF : $$Number:##JGStartFromLabel < 1
-    29 :   Set : JGStartFromLabel : 1
-    30 : ENDIF
+    04 : Call : JGPurcGetAlias : ##pItem
+    05 : Set : Code : $$LastResult
+    06 : IF : $$IsEmpty:##Code
+    07 :   RETURN : No
+    08 : ENDIF
+    09 : Set : Mrp  : $$String:$MRPDetails[Last].MRPRateDetails[Last].MRPRate:StockItem:##pItem
+    10 : Set : Rate : $$String:$StandardPrice:StockItem:##pItem
+    11 : Set : JGPrintAlias    : ##Code
+    12 : Set : JGPrintItemName : ##pItem
+    13 : Set : JGPrintMRP      : ##Mrp
+    14 : Set : JGPrintRate     : ##Rate
+    15 : Call : JGClampPrintCopies : ##pCopies
+    16 : RETURN : Yes
 
 [Function: JGPrintBarcodeStart]
-    Variable : Code : String
-    Variable : Item : String
-    Variable : Mrp  : String
-    Variable : Rate : String
-    01 : Set : Code : $$Alias
-    02 : Set : Item : $Name
+    ;; Stock Item master reprint — copies from UDF JGLabelsToPrint
+    Variable : Code   : String
+    Variable : Item   : String
+    Variable : Copies : Number
+    Variable : Mrp    : String
+    Variable : Rate   : String
+    01 : Set : Item : $Name
+    02 : Set : Code : $$Alias
     03 : IF : $$IsEmpty:##Code
     04 :   MSG BOX : "Print Barcode" : "No barcode available for this Stock Item."
     05 :   RETURN
     06 : ENDIF
-    07 : Set : Mrp  : $$String:$MRPDetails[Last].MRPRateDetails[Last].MRPRate
-    08 : Set : Rate : $$String:$StandardPrice
-    09 : Set : JGPrintAlias    : ##Code
-    10 : Set : JGPrintItemName : ##Item
-    11 : Set : JGPrintMRP      : ##Mrp
-    12 : Set : JGPrintRate     : ##Rate
-    13 : Set : JGStartFromLabel : 1
-    14 : Set : JGLabelsToPrint  : 15
-    15 : Set : JGLabelsPerRow   : 3
-    16 : Set : JGSetLabelWidth  : 60
-    17 : Set : JGSetLabelHeight : 40
-    18 : Set : JGSetGapX        : 3
-    19 : Set : JGSetGapY        : 3
-    20 : Set : JGSetMarginTop   : 5
-    21 : Set : JGSetMarginLeft  : 5
-    22 : Set : JGSetBarcodeHt   : 28
-    23 : Call : JGClampLayoutVars
-    24 : Print Report : JGLabelReport
+    07 : Set : Copies : $$Number:$JGLabelsToPrint
+    08 : IF : ##Copies < 1
+    09 :   Set : Copies : 1
+    10 : ENDIF
+    11 : Set : Mrp  : $$String:$MRPDetails[Last].MRPRateDetails[Last].MRPRate
+    12 : Set : Rate : $$String:$StandardPrice
+    13 : Set : JGPrintAlias    : ##Code
+    14 : Set : JGPrintItemName : ##Item
+    15 : Set : JGPrintMRP      : ##Mrp
+    16 : Set : JGPrintRate     : ##Rate
+    17 : Call : JGClampPrintCopies : ##Copies
+    18 : Print Report : JGLabelReport
