@@ -1,0 +1,42 @@
+                                                                             Objects and Collections
+                                                                                                                                                                                           71
+ 
+  
+2.2  Sources of Collection
+‘Collection’, the data processing artefact of TDL, provides extensive capabilities to gather data not
+only from T ally database, but also from external sources using ODBC, DLLs and HTTP.
+Based on the source of data, the collections are referred to as  External collection, ODBC
+collection, HTTP XML collection and Aggregate/summary collection.
+The Collection of Internal Objects
+In cases where a collection contains objects from T ally database, it is referred to as an Internal
+Collection. In the collection of internal objects, the attributes used are Type, Child Of, Belongs T o.
+External Collection
+The collection of static TDL objects are referred to as an External Collection. The attribute used to
+create an external collection is ‘Object’.
+ODBC Collection
+The Data Objects populated in the collection are from an extern al database using ODBC. The
+attributes used are ODBC, SQL, SQL Objects, SQL Parms and SQL Values.
+HTTP XML Collection
+The Objects of this collection are obtained from the XML file u sing HTTP. The file can be made
+available either on the local machine or on the remote server . The attributes used in creating an
+XML collections are ‘Remote URL’, ‘Remote Request’, ‘XML Object Path’ and ‘XML Object’.
+DLL Collection
+A collection can be populated with objects obtained by executin g a DLL file . The DLL’s can be
+written using an external application to extend the existing fu nctionality of T ally. This allows the
+users to extend the kernel capability by adding their own functions.
+External Plug-Ins are written as DLL’s and can be of two types:
+ C++ DLL’s
+ ActiveX DLL’s
+In order to create the Collection that calls an external PlugIn  the following attributes are used .
+V alues can be passed to the DLL’s as parameters.
+Syntax
+[Collection : My DLL Collection]
+Plug-In         : <path to dll>.<pInput param>
+ActiveX Plug-In : <Project Name>.<Class Name>.<pInput param>
+The value returned by executing the DLL will be available as objects in the collection.
+2.3  Creating a Collection
+TDL provides a set of attributes to create a collection and pop ulate it with objects obtained from
+various data sources. The set of attributes used in the collect ion is based on the data source as
+mentioned in the section Sources of Collections. This section describes the attributes used in the
+creation of an internal and external collection. Creating colle ctions from various data sources will
+be explained later.

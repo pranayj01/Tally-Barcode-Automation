@@ -1,0 +1,32 @@
+                                                                                                                                                                                             63
+Objects and Collections
+Introduction
+In the previous lesson, the usage of V ariables, Buttons and Keys were explained. In this lesson ,
+the concept of ‘Objects’ and ‘Collections’ will be discussed in detail. Let us try to understand what
+an object is in general, its importance and usage in TDL.
+1. Objects
+Any information that is stored in a computer is referred to as Data. Database is a collection of
+information organized in such a way that a computer program can  quickly select desired data. A
+database can be considered as an electronic filing system. T o a ccess information from a
+database, a Database Management System (DBMS) is used. DBMS all ows to enter , organize ,
+and select data in a database.
+The organization of data in a database is referred to as the ‘Database Structure’. The widely used
+database structures are hierarchical, relational, network and object-oriented.
+In the hierarchical structure the data is arranged in a tree-li ke structure. This structure uses the
+parent–child relationships to store repeating information. A parent can have multiple children, but a
+child can have only one parent. The child in turn can have multiple children. Information related to
+one entity is referred to as an object. A database is a group of interrelated objects.
+An object is a self-contained entity that consists of both data , and procedures to manipulate the
+data. It is defined as an independent entity , based on its properties and behaviour/functionality .
+Objects are stored in a data base.
+A relationship can be created between the objects. As discussed, the hierarchical structure has a
+parent-child relationship . For example, child objects can inherit characteristics from pa rent
+objects. Likewise, a child object can not exist without a parent object.
+After discussing the object concept in general, let us examine the T ally object structure in the
+following section.
+1.1  T ally Object Structure
+The T ally data base is hierarchical in nature, in which the obj ects are stored in a tree-like
+structure. Each node in the tree can be a tree in itself. An ob ject in T ally is composed of methods
+and collections. Method is used to retrieve data from the database.  A collection is a group of
+objects. Each object in the collection can further have methods and collections. The structure is as
+shown in Figure 6.1.

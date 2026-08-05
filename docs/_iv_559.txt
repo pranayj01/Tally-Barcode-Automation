@@ -1,0 +1,37 @@
+                                                                            What’s New in Release 1.8
+                                                                                                                                                                                           549
+ 
+  
+ pInputXML: It is an input to DLL and XML data constructed using collection attribute "Input 
+Xml"
+Output values from TDLCollection function:
+pXMLCollection: O/P buffer containing resultant data, based on which, collection is constructed.
+pCollectionSize: Number of wide characters, including the terminating NULL character.
+For VB 6 DLL
+Consider the following example for displaying the values in XML format using VB6. Here also, two
+parameters are being passed to the TDL Collection.
+Public Function TDLCollection(pInputParam As String,
+               pInputXML As String) As String
+TDLCollection = “<Root>
+        <Name>Amazing</Name>
+        <Name>Brilliant</Name>
+        </Root>”
+End Function
+In this example, two attributes are being given as parameters to the function TDLCollection.
+ pInputParam: Simple string value to the function, as specified in ‘Collect ion’ definition, 
+using the attribute “Input Parameter”.
+ pInputXM: Input value in Xml format, as specified in the ‘Collection’ d efinition, using the 
+attribute “Input XML”.
+The function must return an output String value in XML format.
+For C#.Net DLL
+Consider the following example for .Net DLL to convert the inpu t string’s case to upper case .
+Here, TDLCollection is passed two parameters.
+public string TDLCollection (string pInputParam, string pInputXml)
+{
+string resultxml;// to contain xml to be sent back to Tally 
+if (!String.IsNullOrEmpty(pInputXml))
+{
+resultxml = pInputXml.ToUpper();
+}
+else
+{

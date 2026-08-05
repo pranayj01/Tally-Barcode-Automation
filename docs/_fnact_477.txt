@@ -1,0 +1,39 @@
+                                                                            What’s New in Release 3.0
+                                                                                                                                                                                           467
+ 
+  
+Where,
+<Action Name> can be any of ‘Print’, ‘Export’, ‘Mail’ and ‘Upload’. The actio ns ‘Print Report’,
+‘Export Report’, ‘Upload Report’ and ‘Email Report’ have also been enabled in the latest release.
+<Report Name> is name of the report or a dot (.). Since ‘Print Report’, ‘Expo rt Report’, ‘Upload
+Report’ and ‘Email Report’ take the current report in context, and the subsequent parameter is the
+logical parameter for suppressing the configuration, dot (.) signifies the specification of the current
+Report Name. This is an optional parameter . However , it is mandatory in case suppress
+configuration is to be enabled.
+<Logical Value> can be TRUE/FALSE or YES/NO. It is an optional parameter . By default, the
+value is NO. If set to YES, the configuration screen would not be displayed.
+Example:
+T o export current report without displaying the configuration screen:
+|
+|
+40: EXPORT REPORT: . : TRUE
+|
+|
+7. Optional Default TDL Loading
+Many Third Party Applications use T ally's rapid application development environment to render
+various complex reports using T ally Definition Language (TDL). Ta l l y.ERP 9 acts as a front end
+application for various external databases to retrieve and mani pulate information, as and when
+required. T ally, being a comprehensive business application, loads all the TDLs  required as per
+the functional aspects of the Application. In cases where the third party applications require using
+T ally purely as a development platform, loading of complete app lication TDLs may prove to be
+expensive in terms of startup time.
+This release onwards, the application TDLs are segregated as:
+ Base TDL Files – This contains the commonly required templates like styles, va riables, 
+buttons, etc., which can be used by any report which is rendered.
+ Default TDL Files – This contains the TDLs which are specifically meant for funct ional 
+requirements of the T ally .ERP 9 application.
+This has enabled us to launch T ally using the minimal Base TDL files avoiding the overhead of
+loading the Default TDL files. This can be achieved by using the command line parameter /NODEF.
+The variables to be set as per the requirement of each Action is done in the same
+way as discussed in prior releases. Refer to the topic “Programmable Configuration
+for Actions” in Release 1.6 document for more details.

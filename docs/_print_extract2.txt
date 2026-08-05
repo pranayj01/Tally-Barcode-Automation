@@ -1,0 +1,322 @@
+=== PDF 6 STYLE ===\n                                                                                                                                                                                           ii
+ 
+Exposing Methods and Creating Procedures (_) .................. ............................................................. 34
+Reinitialize Definitions (*) .................................. ................................................................................. 35
+Optional Definitions (!) ...................................... ................................................................................. 35
+Dimensions and Formatting 
+Unit of Measurement ........................................... .............................................................................. 39
+Dimensional Attributes ........................................ ............................................................................... 39
+Sizing/Size Attributes ....................................................................................................................... 39
+Spacing/Position Attributes ............................................................................................................... 41
+Alignment Attributes ......................................................................................................................... 42
+Some Specific Attributes ...................................... ............................................................................. 46
+Inactive ........................................................................................................................................... 46
+Invisible .......................................................................................................................................... 46
+Definitions and Attributes for Formatting ..................... ...................................................................... 47
+Definition - Border ............................................................................................................................ 47
+Definition - Style .............................................................................................................................. 48
+Definition - Color .............................................................................................................................. 50
+Attributes ‘Background’ and ‘Print BG’ ................................................................................................ 50
+Attribute - Format ............................................................................................................................. 51
+Variables, Buttons and Keys 
+Variable ...................................................... ....................................................................................... 55
+Attributes of a Variable ..................................................................................................................... 55
+The Scope of a Variable ................................................................................................................... 57
+Modifying the Variable Value ............................................................................................................. 59
+Example - Variables ......................................................................................................................... 60
+Buttons and Keys .............................................. ................................................................................ 60
+Attributes of Buttons/Keys ................................................................................................................. 61
+Objects and Collections 
+Objects ....................................................... ....................................................................................... 63
+Tally Object Structure ....................................................................................................................... 63
+Tally Objects Types ......................................................................................................................... 65
+Object Context ................................................................................................................................ 68
+Collections ................................................... ...................................................................................... 69
+Types of Collection .......................................................................................................................... 70
+Sources of Collection ....................................................................................................................... 71
+Creating a Collection ........................................................................................................................ 71
+Object Association ............................................ ................................................................................. 73
+Report Level Object association ........................................................................................................ 73
+Part Level Object Association ........................................................................................................... 74
+Line Level Object Association ........................................................................................................... 76
+ Field Level Object Association .......................................................................................................... 77\n\n=== PDF 7 PRINT ACTIONS ===\n                                                                                                                                                                                           iii
+ 
+Methods ....................................................... ...................................................................................... 77
+Types of Methods ............................................................................................................................ 77
+Accessing Methods .......................................................................................................................... 77
+Collection Capabilities ....................................... ................................................................................ 80
+Basic Capabilities ............................................................................................................................ 80
+Advanced Capabilities ...................................................................................................................... 87
+Actions in TDL 
+Categories of Actions ......................................... ............................................................................... 93
+Action Association ........................................................................................................................... 94
+Components of Actions ......................................... ............................................................................ 96
+Global Actions ................................................ ................................................................................... 97
+Action - Menu .................................................................................................................................. 97
+Action - Modify Object ...................................................................................................................... 99
+Action - Browse URL ...................................................................................................................... 100
+Actions - Create and Alter ............................................................................................................... 101
+Actions - Create Collection, Display Collection and Alter Collection ..................................................... 104
+Object Specific Actions ....................................... ............................................................................. 106
+Menu Actions – Menu Up, Menu Down, Menu Reject ........................................................................ 106
+Form Actions - Form Accept, Form Reject, Form End ........................................................................ 106
+Part Actions – Part Home, Part End, Part Pg Up ............................................................................... 107
+Line Actions - Explode, Display Object, Alter Object .......................................................................... 108
+Field Actions - Field Copy, Field Paste, Field Erase, Calculator .......................................................... 109
+User Defined Fields 
+What is UDF? .................................................. ................................................................................ 111
+Creating a UDF ............................................................................................................................. 111
+Storing User Inputs in the UDF ........................................................................................................ 112
+Retrieving the value of UDF from an Object ...................................................................................... 112
+Classification of UDF’s ....................................... ............................................................................. 112
+Simple UDF .................................................................................................................................. 112
+Aggregate UDF ............................................................................................................................. 114
+Reports, Printing and Validation Controls 
+Reports ....................................................... ..................................................................................... 119
+Tabular Reports ............................................................................................................................. 119
+Hierarchical Report (Drill down Report) ............................................................................................ 124
+Column Based Reports .................................................................................................................. 127
+Printing ...................................................... ...................................................................................... 139
+Menu Action – Print/Print Collection ................................................................................................. 140
+Button Action – Print Report ............................................................................................................ 140
+Page Breaks ................................................................................................................................. 141
+Frequently Used Attributes and Functions ........................................................................................ 144\n\n=== PDF 7 PRINTING CH ===\n                                                                                                                                                                                           iii
+ 
+Methods ....................................................... ...................................................................................... 77
+Types of Methods ............................................................................................................................ 77
+Accessing Methods .......................................................................................................................... 77
+Collection Capabilities ....................................... ................................................................................ 80
+Basic Capabilities ............................................................................................................................ 80
+Advanced Capabilities ...................................................................................................................... 87
+Actions in TDL 
+Categories of Actions ......................................... ............................................................................... 93
+Action Association ........................................................................................................................... 94
+Components of Actions ......................................... ............................................................................ 96
+Global Actions ................................................ ................................................................................... 97
+Action - Menu .................................................................................................................................. 97
+Action - Modify Object ...................................................................................................................... 99
+Action - Browse URL ...................................................................................................................... 100
+Actions - Create and Alter ............................................................................................................... 101
+Actions - Create Collection, Display Collection and Alter Collection ..................................................... 104
+Object Specific Actions ....................................... ............................................................................. 106
+Menu Actions – Menu Up, Menu Down, Menu Reject ........................................................................ 106
+Form Actions - Form Accept, Form Reject, Form End ........................................................................ 106
+Part Actions – Part Home, Part End, Part Pg Up ............................................................................... 107
+Line Actions - Explode, Display Object, Alter Object .......................................................................... 108
+Field Actions - Field Copy, Field Paste, Field Erase, Calculator .......................................................... 109
+User Defined Fields 
+What is UDF? .................................................. ................................................................................ 111
+Creating a UDF ............................................................................................................................. 111
+Storing User Inputs in the UDF ........................................................................................................ 112
+Retrieving the value of UDF from an Object ...................................................................................... 112
+Classification of UDF’s ....................................... ............................................................................. 112
+Simple UDF .................................................................................................................................. 112
+Aggregate UDF ............................................................................................................................. 114
+Reports, Printing and Validation Controls 
+Reports ....................................................... ..................................................................................... 119
+Tabular Reports ............................................................................................................................. 119
+Hierarchical Report (Drill down Report) ............................................................................................ 124
+Column Based Reports .................................................................................................................. 127
+Printing ...................................................... ...................................................................................... 139
+Menu Action – Print/Print Collection ................................................................................................. 140
+Button Action – Print Report ............................................................................................................ 140
+Page Breaks ................................................................................................................................. 141
+Frequently Used Attributes and Functions ........................................................................................ 144\n\n=== PDF 12 IMAGE ===\n                                                                                                                                                                                           viii
+ 
+What’s New in Release 4.7 
+Developer Mode Enhancements ................................... .................................................................. 353
+Event ‘NatLangQuery’ Introduced ............................... .................................................................... 357
+ZIP - UNZIP ................................................... .................................................................................. 360
+Columnar Capability in Edit Mode .............................. ..................................................................... 366
+New data types Introduced ..................................... ......................................................................... 367
+What’s New in Release 4.61 
+COM Data Types Support ........................................ ....................................................................... 389
+What’s New in Release 4.6 
+COM DLL Support in TDL ........................................ ....................................................................... 393
+Developer Mode ................................................ .............................................................................. 400
+What’s New in Release 4.5 
+Platform Functions ............................................ ............................................................................... 417
+Action Enhancements ........................................... ........................................................................... 422
+What’s New in Release 3.62 
+Multiple Orientation Support for Printing ..................... ..................................................................... 425
+What’s New in Release 3.61 
+Action Enhancements ........................................... ........................................................................... 427
+Function Enhancements ......................................... ......................................................................... 428
+What’s New in Release 3.6 
+Collection Enhancements ....................................... ......................................................................... 431
+Action Enhancements ........................................... ........................................................................... 432
+Platform Functions and Variables .............................. ...................................................................... 433
+What’s New in Release 3.0 
+Collection Enhancements ....................................... ......................................................................... 439
+Image Printing Capabilities ................................... ........................................................................... 444
+Enhanced Columnar Capability .................................. ..................................................................... 448
+Persisting Variables at System Scope in a User Specified File . ...................................................... 458
+New Events Introduced ......................................... .......................................................................... 462
+Enhancement – Programmable Configuration ...................... .......................................................... 466
+Optional Default TDL Loading .................................. ....................................................................... 467
+Refresh Issues in context of User Defined Function Evaluation . ..................................................... 468
+What’s New in Release 2.0 
+TDL Procedural Enhancements ................................... ................................................................... 477
+Variable Framework Enhancements ............................... ................................................................4 9 9
+Event Framework Enhancements .................................. ................................................................. 513
+Action Enhancements ........................................... ........................................................................... 515\n\n=== PDF 61 STYLE ===\nDimensions and Formatting 
+48
+Attribute - Color
+The ‘Color’ attribute of the ‘Border’ Definition is used to specify the Color required for the border in
+‘Display’ mode. In a ‘Border’ definition, the attribute ‘Color’  requires two values to be specified ,
+viz. First value for a Black and White Monitor, and the second for a Color monitor.
+[Border : Top Bottom Colored] 
+Top        : Thin
+Bottom     : Thin
+Color      : "Deep Grey, LeafGreen" 
+[Field : Total Field]
+Set AS     : $Total
+Border     : Top Bottom Colored
+Attribute - PrintFG
+This attribute is used to specify the Color required for the border during printing.
+[Border : Top Bottom Colored] 
+Top         : Thin
+Bottom      : Thin
+Color       : "Deep Grey, Leaf Green" 
+Print FG    : “Leaf Green”
+[Field : Total Field] 
+Set AS      : $Total
+Border      : Top Bottom Colored
+4.2  Definition - Style
+The Definition ‘Style’ can be used in the ‘Field’ Definition on ly. This definition determines the
+appearance of the text being displayed/printed, by using a corr esponding font scheme, i.e., Bold,
+Italic, Point Size, Font Name, etc. The ‘Style’ attribute in ‘F ield’ Definition is used to format the
+appearance of the text appearing within the Field, both in Disp lay and Print mode, provided the
+‘Print Style’ attribute is not used within the current Field. The ‘Print Style’ attribute is used in Field, if
+the Style required while displaying is different from the Style required while printing.
+Syntax
+[Style : <Style Name>]
+    Font     : <Font Name>
+    Height   : <required Font Height in Point Size> 
+    Bold     : <Logical Formula>\n\n=== PDF 143 BUTTON SAMPLE ===\nReports, Printing and Validation
+132
+[Button : MyAutoButton] 
+Key          : Alt+N
+Action       : Auto Columns : MyAutoColumns 
+Title        : $$LocaleString:"Auto Column"
+ Figure 9.11  Auto Column Reports
+Step 2: The Configuration Report ‘MultiAutoColumns’
+1. In configuration Report, the user will be given options like ‘Days’,’ Monthly’, Y early’, ‘Company’,
+etc., based on which the columns are repeated. In TDL, these options are external objects.
+[Collection : MyAuto Columns]
+Title      : $$LocaleString : "Column Details"
+Object     : MyCurrentCompany, MyQuarterly, MyMonthly, MyYearly, 
+             MyHalfYearly
+Filter     : Belongs
+Format     : $$Name, 15
+;; ‘Belongs’ is a system formula which filters the objects
+\n\n=== PDF 151 PRINT ACTIONS ===\nReports, Printing and Validation
+140
+2.1  Menu Action – Print/Print Collection
+Menu Action Print or Print Collection enters the final Report in ‘Print’ mode.
+Syntax
+[Menu : <Menu Name>]
+Add : Key Item:[Position] : <Display Item> : <Unique Key>:
+         <ActionKeyword> : <Action Parameter>
+;; where Action Keyword can be ‘Print’ or ‘Print Collection’ which triggers a list and displays the
+;; final report based on user selection
+Example:
+[#Menu : Printing Menu]
+Add : Key Item : My Ledgers  : L : Print Collection : Ledger Vouchers 
+Add : Key Item : My Day Book : D : Print : Day Book
+Here, we are adding the Item ‘My Ledgers’, which has an action ‘Print Collection’ associated to it.
+It displays a collection bearing the List of ledgers, which on user selection, enters the final report
+in ‘Print’ Mode. On accepting, it directly goes to the printer.
+2.2  Button Action – Print Report
+Another method of printing reports is by way of associating a B utton with an action ‘Print Report’
+at the ‘Form’ definition . Action ‘Print Report’ prints the current report by default. Th is action
+accepts Report Name as its parameter . If any report other than current needs to be printed, an
+additional parameter containing Report Name needs to be specified. The current report can pass
+the user selection to the printing report through a default collection called ‘Parameter Collection’.
+Syntax
+[Button : <Button Name>]
+Action : <Print Report> [: Action Parameter]
+Example:
+Consider a report displaying a list of employees, wherein the user selects the required employees
+for whom pay slips need to be printed. On clicking the ‘Print’ Button, the current report bearing the
+list of employees is not required. A new report printed for various pay slips allotted to the selected
+employees is needed.
+[Button : Print Selected Pay slips]
+;; Associate this button to the current report displaying the list of employees
+Key : Alt + F11 Title : "Print Selected Pay slips"
+;; Multiple Payslip Print Report will be printed on activation of this Button
+;; The Report should be altered to include the inbuilt Collection ‘Parameter
+;; Collection’ to print the user selection for the list of employees
+Action : Print Report : Multi Pay Slip Print \n\n=== PDF 151 BUTTON SAMPLE ===\nReports, Printing and Validation
+140
+2.1  Menu Action – Print/Print Collection
+Menu Action Print or Print Collection enters the final Report in ‘Print’ mode.
+Syntax
+[Menu : <Menu Name>]
+Add : Key Item:[Position] : <Display Item> : <Unique Key>:
+         <ActionKeyword> : <Action Parameter>
+;; where Action Keyword can be ‘Print’ or ‘Print Collection’ which triggers a list and displays the
+;; final report based on user selection
+Example:
+[#Menu : Printing Menu]
+Add : Key Item : My Ledgers  : L : Print Collection : Ledger Vouchers 
+Add : Key Item : My Day Book : D : Print : Day Book
+Here, we are adding the Item ‘My Ledgers’, which has an action ‘Print Collection’ associated to it.
+It displays a collection bearing the List of ledgers, which on user selection, enters the final report
+in ‘Print’ Mode. On accepting, it directly goes to the printer.
+2.2  Button Action – Print Report
+Another method of printing reports is by way of associating a B utton with an action ‘Print Report’
+at the ‘Form’ definition . Action ‘Print Report’ prints the current report by default. Th is action
+accepts Report Name as its parameter . If any report other than current needs to be printed, an
+additional parameter containing Report Name needs to be specified. The current report can pass
+the user selection to the printing report through a default collection called ‘Parameter Collection’.
+Syntax
+[Button : <Button Name>]
+Action : <Print Report> [: Action Parameter]
+Example:
+Consider a report displaying a list of employees, wherein the user selects the required employees
+for whom pay slips need to be printed. On clicking the ‘Print’ Button, the current report bearing the
+list of employees is not required. A new report printed for various pay slips allotted to the selected
+employees is needed.
+[Button : Print Selected Pay slips]
+;; Associate this button to the current report displaying the list of employees
+Key : Alt + F11 Title : "Print Selected Pay slips"
+;; Multiple Payslip Print Report will be printed on activation of this Button
+;; The Report should be altered to include the inbuilt Collection ‘Parameter
+;; Collection’ to print the user selection for the list of employees
+Action : Print Report : Multi Pay Slip Print \n\n=== PDF 454 IMAGE ===\nWhat’s New in Release 3.0
+444
+Where,
+<Collection Name> is the name of the collection where the data is populated as objects.
+<T ype> specifies the type of data source. As per the new enhancement, it is “Directory”.
+<Identity> is the Directory/folder Path, when the type specified is ‘Directory’
+<Encoding> can be ignored for Type “Directory”.
+The following code will populate the collection “ABC Contents” with the folder contents from the
+path “C:\ABC”. In this case , each of the items, i.e ., a.txt, b.txt and “abcsub”, will be available as
+separate objects of the collection. The related information per taining to each object will be
+available as methods $name, $filesize, $IsDirectory, $IsReadOnly, $IsHidden, etc.
+[Collection : ABC Contents]
+Data Source : Directory : "C:\ABC"
+2. Image Printing Capabilities
+Over the years, there has been a major requirement from the use r community to enable Image
+Printing in T ally. Earlier , we used to achieve this capability by creating a new Font Type  by
+associating an Image with a particular character and further using the ‘Style’ for the field. This had
+a few limitations in terms of image size , resolution and color . Also, it was not a clean way of
+incorporating the feature.
+From this release onwards, Image Printing is being supported with the help of the following latest
+enhancements:
+ ‘Graph Type’ attribute of Part allowing the specification of BMP, enabled for ‘Print’ Mode
+ A new Definition Type ‘Resource’ introduced in TDL
+The configuration settings allow the user to specify the locati on of the Image file and the same is
+printed as a logo on the top left of the following default Reports.
+ Sales Invoice - both Normal and Simple formats
+ Delivery Note/Challan
+ Debit Note
+ Credit Note
+ Outstanding Receivables
+ Remainder Letters
+ Pay Slips
+ Purchase Order
+ Receipt voucher
+$filesize is applicable only if the object is of type FILE.
+\n\n

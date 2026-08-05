@@ -1,0 +1,43 @@
+=== PAGE 549 ===\n                                                                            What’s New in Release 1.8
+                                                                                                                                                                                           539
+ 
+  
+Set As : $$CallDllFunction : TestDll : FuncA : #Field1
+T o call FuncB
+[Key : Key1]
+Key    : Ctrl+A
+Action : Set : VarStatus : $$CallDllFunction : TestDll : FuncB : #Field1
+This key can be associated to a Form or a Menu. The function FuncB in T estDll can be used to
+return the status of the execution , i .e., Success/Failure (1/0) . This value can be obtained in a
+variable in TDL and used to display the appropriate message to the user.
+$$CallDllFunction can be used to call any function which returns single values. I f the function
+returns an array of values, then it is advisable to use $$DLLCollection.
+Let us have an overview of the usage of DLL Collection.
+DLL Collection, its Attributes and Usage
+T ally now provides a TDL interface to obtain data sets in Collection from external Plug-Ins. These
+Plug-Ins are written as DLL’s which can be used to fetch external data (i.e., from Internet, external
+Database, etc.). These DLL's should return a valid XML which ca n be easily mapped into TDL
+Collection. In other words, TDL developer can provide a simple string value and/or XML to the
+DLL function. The DLL gives XML data as an output. Collection takes this data and converts it into
+objects and object methods, which can be accessed in TDL like other objects.
+DLL collection will be very useful in the following scenarios:
+1. T o display stock quotes from the internet
+2. T o get data from different formats like CSV, HTML
+3. External device interfaces
+4. RFID Barcode scanner
+5. Petrol Pump device interface
+6. Foot fall count
+7. External application interfaces
+8. GAS distributor application
+9. T o get attendance details in Pay Roll through swipe
+In DLL collection, support is being provided for Plug-Ins and ActiveX-Plug-Ins.
+ Plug-Ins: DLLs created using C++ or VC++. These DLLs need not be regist ered
+separately.
+ ActiveX Plug-Ins: DLLs created by using VB6, VB.Net, C#.Net, etc. These DLLs ha ve to 
+be registered. Registration process has been explained in detail later.
+At present, the ‘Collection’ definition allows working with a C ++ DLL, VB DLL, .Net DLL , e t c.,
+which has a function defined by the name TDLCollection (The function has to be created by this
+name ONL Y). This function delivers an XML which is available as objects in the Collection.
+Attributes of DLL Collection
+The attributes of DLL Collection can be categorized as follows:
+ For specifying the source\n\nTOC-ish p3: topics i.e., the creation of various types of Reports, Printing and Voucher/Invoice customisations.\nTOC-ish p6: Attributes ‘Background’ and ‘Print BG’ ................................................................................................ 50\nTOC-ish p7: Reports, Printing and Validation Controls \nTOC-ish p7: Printing ...................................................... ...................................................................................... 139\nTOC-ish p7: Menu Action – Print/Print Collection ................................................................................................. 140\nTOC-ish p7: Button Action – Print Report ............................................................................................................ 140\nTOC-ish p12: Multiple Orientation Support for Printing ..................... ..................................................................... 425\nTOC-ish p12: Image Printing Capabilities ................................... ........................................................................... 444\nTOC-ish p13: Invoking Actions on Event Occurrence - with System and Printing Events Introduced ................... 533\n

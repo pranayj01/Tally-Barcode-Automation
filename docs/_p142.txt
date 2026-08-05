@@ -1,0 +1,22 @@
+                                                                            Reports, Printing and Validation
+                                                                                                                                                                                           131
+ 
+  
+3. Line Definition:- Repeating Field
+[Line : MulCol TB Details]
+Fields       : MulCol TB Name Field, MulCol TB Amount Field 
+Repeat       : MulCol TB Amount Field
+ Figure 9.10  Multi Column Report 
+Auto-Column Report
+An Auto column report is one in which multiple columns are repeated by just one click of a button.
+Trial Balance, Balance Sheet, Stock Summary, etc., are some of the default Reports in T ally .ERP 9
+which have an Auto column feature.
+Designing an Auto-Column Report
+Auto column Report is similar to a Multi column Report, except that here, a set of columns are
+repeated, instead of one. User input will decide the criteria on which the columns are repeated.
+Example: Incorporating Auto Column Feature to Trial Balance report
+Step 1: Adding the Configuration Screen to the Form
+The Button MyAutoButton is added to Form. Through this Button , the configuration Report
+‘MyAutoColumns’ is arrived at through the Auto columns mode.
+[Form : MulCol Trial Balance] 
+BottomButton : MyAutoButton,

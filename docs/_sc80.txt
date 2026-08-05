@@ -1,0 +1,24 @@
+                                                                             Objects and Collections
+                                                                                                                                                                                           69
+ 
+  
+T o understand the concept of object context, consider the following example:
+When the Interface object ‘Report’ is associated to the Data Object ‘Ledger’, then all the methods
+and collection of the Ledger object can be referenced in the as sociated report. The Method
+$Name, when used in the field, will display the name of the Led ger object associated at the
+Report level. If no object is associated at the Report level, t hen no data will be displayed in the
+field, since there is no object in the context.
+2. Collections
+A Collection is termed as a group of objects. It refers to a collection of zero or more objects. The
+objects in the collection can be obtained either from the T ally  database, or from external data
+sources, e.g., XML file.
+In default TDL , many collections are defined which are referred to as Internal  Collections. The
+collections created by a user are called user defined collectio ns. Object in a collection follow the
+T ally object structure, i.e., each object of the collection can conta in Methods, Collections, and so
+on.
+A collection can be a collection of objects or a collection of collections.  Figure 6.3 shows the
+collection of objects.
+ Figure 6.3  Collection of objects
+The collection of collections is referred to as a Union of coll ection. This capability will be
+discussed in detail in the section Collection Capabilities.
+In TDL, the collections are of two types: Simple collection and Compound collections.

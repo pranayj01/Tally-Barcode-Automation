@@ -1,0 +1,178 @@
+;; ============================================================================
+;; LabelPrint.tdl - 50mm x 25mm native Tally label (Code128 font)
+;; Kept to attributes TallyPrime accepts on Form/Part/Field/Report
+;; ============================================================================
+
+[Function: JG Build Print Collection From Queue]
+    01 : IF : $$IsEmpty:##JGLabelList
+    02 :   RETURN : No
+    03 : ENDIF
+    04 : RETURN : Yes
+
+[Function: JG Print Label Queue]
+    Variable : Queue : String
+    Variable : Piece : String
+    Variable : Sep   : Number
+    Variable : Item  : String
+    Variable : Copies : Number
+    Variable : Pipe  : Number
+    Variable : c : Number
+
+    01 : IF : $$IsEmpty:##JGLabelList
+    02 :   MSG BOX : "JG Barcode" : "No labels in print queue."
+    03 :   RETURN
+    04 : ENDIF
+
+    05 : Set : Queue : ##JGLabelList
+
+    06 : WHILE : NOT $$IsEmpty:##Queue
+    07 :   Set : Sep : $$StringFind:##Queue:"~"
+    08 :   IF : ##Sep < 1
+    09 :     Set : Piece : ##Queue
+    10 :     Set : Queue : ""
+    11 :   ELSE
+    12 :     Set : Piece : $$StringPart:##Queue:1:(##Sep - 1)
+    13 :     Set : Queue : $$StringPart:##Queue:(##Sep + 1):$$StringLength:##Queue
+    14 :   ENDIF
+
+    15 :   IF : NOT $$IsEmpty:##Piece
+    16 :     Set : Pipe : $$StringFind:##Piece:"|"
+    17 :     IF : ##Pipe < 1
+    18 :       Set : Item : ##Piece
+    19 :       Set : Copies : 1
+    20 :     ELSE
+    21 :       Set : Item : $$StringPart:##Piece:1:(##Pipe - 1)
+    22 :       Set : Copies : $$Number:$$StringPart:##Piece:(##Pipe + 1):$$StringLength:##Piece
+    23 :     ENDIF
+    24 :     IF : ##Copies < 1
+    25 :       Set : Copies : 1
+    26 :     ENDIF
+
+    27 :     Set : JGWorkItem : ##Item
+    28 :     Set : JGWorkBarcode : $JGBarcode:StockItem:##Item
+    29 :     Set : JGWorkEncoded : $JGBarcodeEncoded:StockItem:##Item
+    30 :     Set : JGWorkBrand : $JGBrand:StockItem:##Item
+    31 :     Set : JGWorkMrp : $JGMrp:StockItem:##Item
+    32 :     Set : JGWorkSellRate : $JGSellingRate:StockItem:##Item
+
+    33 :     IF : NOT $$IsEmpty:##JGWorkBarcode
+    34 :       IF : $$IsEmpty:##JGWorkEncoded
+    35 :         Set : JGWorkEncoded : $$Call:JG Code128 Encode Safe:##JGWorkBarcode
+    36 :       ENDIF
+    37 :       Set : c : 1
+    38 :       WHILE : ##c <= ##Copies
+    39 :         Display : JG Barcode Label Report
+    40 :         Set : c : ##c + 1
+    41 :       END WHILE
+    42 :     ENDIF
+    43 :   ENDIF
+    44 : END WHILE
+
+    45 : MSG BOX : "JG Barcode" : "Label preview/print complete. Use Print (Ctrl+P) on the label screen if needed."
+
+;; ----- Label report (~50mm x 25mm using inches: 2.00 x 0.98) -----
+
+[Report: JG Barcode Label Report]
+    Form  : JG Barcode Label Form
+    Title : "Barcode Label"
+
+[Form: JG Barcode Label Form]
+    Parts  : JG Label Part
+    Width  : 2 Inch
+    Height : 1 Inch
+
+[Part: JG Label Part]
+    Lines    : JG Lbl Name, JG Lbl Brand, JG Lbl Bars, JG Lbl Code, JG Lbl Rates
+    Vertical : Yes
+    Height   : 100 % Page
+    Width    : 100 % Page
+
+[Line: JG Lbl Name]
+    Fields : JG Lbl Name Fld
+
+[Field: JG Lbl Name Fld]
+    Use    : Name Field
+    Set As : $$StringPart:##JGWorkItem:1:28
+    Width  : 40
+    Style  : Tiny Bold
+    Align  : Left
+
+[Line: JG Lbl Brand]
+    Fields : JG Lbl Brand Fld
+
+[Field: JG Lbl Brand Fld]
+    Use    : Name Field
+    Set As : $$StringPart:##JGWorkBrand:1:24
+    Width  : 40
+    Style  : Tiny
+    Align  : Left
+
+[Line: JG Lbl Bars]
+    Fields : JG Lbl Bars Fld
+
+[Field: JG Lbl Bars Fld]
+    Use    : Name Field
+    Set As : ##JGWorkEncoded
+    Width  : 40
+    Align  : Centre
+    Style  : JG Code128 Style
+
+[Line: JG Lbl Code]
+    Fields : JG Lbl Code Fld
+
+[Field: JG Lbl Code Fld]
+    Use    : Name Field
+    Set As : ##JGWorkBarcode
+    Width  : 40
+    Style  : Tiny
+    Align  : Centre
+
+[Line: JG Lbl Rates]
+    Fields : JG Lbl Mrp Fld, JG Lbl Rate Fld
+
+[Field: JG Lbl Mrp Fld]
+    Use    : Name Field
+    Set As : "MRP:" + $$String:##JGWorkMrp
+    Width  : 20
+    Style  : Tiny Bold
+    Align  : Left
+
+[Field: JG Lbl Rate Fld]
+    Use    : Name Field
+    Set As : "Rate:" + $$String:##JGWorkSellRate
+    Width  : 20
+    Style  : Tiny Bold
+    Align  : Right
+
+[Style: JG Code128 Style]
+    Font   : "Libre Barcode 128"
+    Height : 28
+    Bold   : No
+
+[Function: JG Reprint One]
+    Parameter : pCode : String
+    Variable  : Item : String
+    01 : Set : Item : $$FilterValue:$Name:StockItem:JG By Barcode Coll:##pCode
+    02 : IF : $$IsEmpty:##Item
+    03 :   Set : Item : $$FilterValue:$Name:StockItem:JG By Mfr Coll:##pCode
+    04 : ENDIF
+    05 : IF : $$IsEmpty:##Item
+    06 :   MSG BOX : "Reprint" : "Barcode not found: " + ##pCode
+    07 :   RETURN
+    08 : ENDIF
+    09 : Set : JGLabelList : ##Item + "|1~"
+    10 : Call : JG Print Label Queue
+
+[Collection: JG By Barcode Coll]
+    Type   : Stock Item
+    Filter : JGFiltBarcode
+
+[Collection: JG By Mfr Coll]
+    Type   : Stock Item
+    Filter : JGFiltMfr
+
+[Formula: JGFiltBarcode]
+    IF $$IsEmpty:##VGParm THEN No ELSE $$IsEqual:$JGBarcode:$$String:##VGParm
+
+[Formula: JGFiltMfr]
+    IF $$IsEmpty:##VGParm THEN No ELSE $$IsEqual:$JGManufacturerBarcode:$$String:##VGParm

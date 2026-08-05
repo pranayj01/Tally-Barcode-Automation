@@ -1,0 +1,36 @@
+What’s New in Release 3.0
+468
+7.1  Command Line Parameter - NODEF
+Syntax
+<Tally Application> /NODEF
+Example:
+D:\Tally.ERP9\Tally.Exe/NODEF/NOINITDL/TDL:"D:
+                                         \Party\CustomReports.TDL"
+In this case, the T ally .ERP 9 application would start only with Base TDLs, without loading the
+default TDL Files, which means that T ally Application would start rapidly. None of the INI TDLs will
+be loaded due to the parameter /NOINITDL. Only the TDL file passed with the parameter /TDL,
+D:\Party\CustomReports.TDL will be loaded.
+8. Refresh Issues in context of User Defined Function 
+Evaluation
+As we are already aware, the TDL Procedural artefact “Function” is used in two scenarios:
+1. Evaluation – where the function is expected to perform some computation an d return the
+result to the expression within which it is called. The usage i s similar to a Predefined function .
+In evaluation mode, the function is called using a “$$”.
+Example:
+[Field : My Field]
+Set as : $$MyUserFunction : Parameter1 : Parameter2
+2. Execution – where the function is expected to perform certain set of tasks, which changes the
+state of the application or the data . The usage is similar to a Predefined Action. In execution
+mode, the function is called using the keyword “Call” and can be invoked from a Key/Button, a
+Menu item, an Event, or from within another function.
+Example:
+[Key : My Key]
+Action : CALL : MyUserActionFpunction : Parameter1 : Parameter2
+In case of predefined Functions, whenever a function accesses a nd manipulates certain UI
+elements like variable, field , etc., or data elements like method values of objects , a link is
+established between the element and the calling UI. Each time these get manipulated, the function
+gets re-evaluated, new values are calculated and the corresponding U I is refreshed with new
+values.
+In line with the above enhancement, the pr oduct T ally .Developer 9 Release 3.0 will
+also support the command line parameter /NODEF. In case the application needs to
+be started with only the Base TDLs, the option /NODEF will be used.

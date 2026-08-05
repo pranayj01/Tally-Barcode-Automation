@@ -1,0 +1,17 @@
+;; ============================================================================
+;; 01_udf.tdl — Company sequence UDFs ONLY
+;;
+;; ARCHITECTURE (FINAL):
+;;   Stock Item barcode storage = native Alias field ONLY.
+;;   No Stock Item barcode UDFs. No manufacturer barcode. No internal barcode UDF.
+;;
+;; These Company UDFs track the running sequence used to GENERATE alias values.
+;; They do not store barcodes on items.
+;;
+;; Indexes 21100–21102 reserved for JG Barcode Add-on (company sequence)
+;; ============================================================================
+
+[System: UDF]
+    JGNextSeq       : Number : 21100
+    JGHighestIssued : Number : 21101
+    JGSequenceYear  : Number : 21102

@@ -1,0 +1,17 @@
+Objects and Collections
+70
+2.1  T ypes of Collection
+Collections can have multiple Methods and Collection. They are classified as Simple Collection
+and Compound Collection based on the constituents of the collection.
+ Figure 6.4  The classification of collection
+Simple Collections
+Simple collections contain only a single method which is repeat able. Simple Collections cannot
+have sub-collections. The Name and Address are examples of Simple Collections.
+Compound Collections
+The collections which have sub-collections and multiple methods  are called Compound
+Collection. Any Internal or External Collections of Primary or Secondary or user defined objects
+is an  example of a Compound Collection. In both Simple and Compound C ollections, the index
+can be used to fetch user-defined or internal methods of the Object. The Index can be either First or
+Last.
+After describing the classification of a Collection, the follow ing topic describes the various data
+sources of a Collection.

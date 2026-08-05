@@ -1,0 +1,49 @@
+;; ============================================================================
+;; SalesScan.tdl — scanner support during sales (no external service)
+;; Alt+B → scan → stock item selected → Qty 1 → Enter completes invoice
+;; ============================================================================
+
+[Key: JG Native Sales Scan Key]
+    Key      : Alt + B
+    Action   : Call : JG Native Sales Scan
+    Inactive : NOT ($$IsSales:$VoucherTypeName OR $$IsEqual:$VoucherTypeName:"Sales")
+
+[#Form: Voucher]
+    Add : Key : JG Native Sales Scan Key
+
+[Function: JG Native Sales Scan]
+    Variable : Scanned : String
+    Variable : Item : String
+    01 : Input Value : "Scan Barcode" : JGScanBuffer : String
+    02 : Set : Scanned : ##JGScanBuffer
+    03 : IF : $$IsEmpty:##Scanned
+    04 :   RETURN
+    05 : ENDIF
+
+    06 : Set : Item : $$FilterValue:$Name:StockItem:JG By Barcode Coll:##Scanned
+    07 : IF : $$IsEmpty:##Item
+    08 :   Set : Item : $$FilterValue:$Name:StockItem:JG By Mfr Coll:##Scanned
+    09 : ENDIF
+
+    10 : IF : $$IsEmpty:##Item
+    11 :   MSG BOX : "Barcode Scan" : "No stock item for: " + ##Scanned
+    12 :   RETURN
+    13 : ENDIF
+
+    14 : New Object : Inventory Entries
+    15 : Set Value  : StockItemName : ##Item
+    16 : Set Value  : BilledQty : 1
+    17 : IF : NOT $$IsEmpty:$JGSellingRate:StockItem:##Item
+    18 :   Set Value : Rate : $JGSellingRate:StockItem:##Item
+    19 : ENDIF
+    20 : Accept Alter
+    21 : MSG BOX : "Barcode Scan" : ##Item + "  |  Qty 1  |  Press Enter to continue"
+
+[Function: JG Resolve Barcode To Item]
+    Parameter : pCode : String
+    Variable  : Item : String
+    01 : Set : Item : $$FilterValue:$Name:StockItem:JG By Barcode Coll:##pCode
+    02 : IF : $$IsEmpty:##Item
+    03 :   Set : Item : $$FilterValue:$Name:StockItem:JG By Mfr Coll:##pCode
+    04 : ENDIF
+    05 : RETURN : ##Item

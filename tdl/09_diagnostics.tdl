@@ -1,0 +1,37 @@
+;; ============================================================================
+;; 09_diagnostics.tdl — QA diagnostics for barcode generation
+;;
+;; Depends on: 01_udf.tdl, 02_functions.tdl
+;;
+;; ARCHITECTURE (FINAL): Barcode = Stock Item Alias.
+;; Peek/Allocate here only exercise generation — they do not write Alias.
+;; Alias is written by Purchase (Module 04).
+;;
+;; Uses Gateway Menu → Call (NOT Field Action).
+;; Field:Action caused T0014 on TallyPrime and is intentionally avoided.
+;; ============================================================================
+
+[Function: JG Test Show Peek]
+    Variable : Code : String
+    Variable : Initials : String
+    Variable : YY : String
+    Variable : Next : String
+    Variable : High : String
+    Variable : Year : String
+    01 : Call : JG Ensure Company Sequence
+    02 : Set : Code : $$JG Peek Next Barcode
+    03 : Set : Initials : $$JG Derive Company Initials
+    04 : Set : YY : $$JG Current Year Suffix
+    05 : Set : Next : $$String:$$Number:$JGNextSeq:Company:##SVCurrentCompany
+    06 : Set : High : $$String:$$Number:$JGHighestIssued:Company:##SVCurrentCompany
+    07 : Set : Year : $$String:$$Number:$JGSequenceYear:Company:##SVCurrentCompany
+    08 : MSG BOX : "Peek" : "Company: " + ##SVCurrentCompany + $$LocalCRLF + "Initials: " + ##Initials + $$LocalCRLF + "YY: " + ##YY + $$LocalCRLF + "Next Alias value: " + ##Code + $$LocalCRLF + "JGNextSeq: " + ##Next + $$LocalCRLF + "HighestIssued: " + ##High + $$LocalCRLF + "SequenceYear: " + ##Year + $$LocalCRLF + "(Does not write Stock Item Alias)"
+
+[Function: JG Test Allocate]
+    Variable : Code : String
+    01 : Set : Code : $$JG Allocate Next Barcode
+    02 : MSG BOX : "Allocated" : "Generated: " + ##Code + $$LocalCRLF + "Next will be: " + $$JG Peek Next Barcode + $$LocalCRLF + "(Does not write Stock Item Alias — Purchase will)"
+
+[#Menu: Gateway of Tally]
+    Add : Item : Before : @@LocQuit : JG Peek Next Barcode : Call : JG Test Show Peek
+    Add : Item : Before : @@LocQuit : JG Allocate Barcode : Call : JG Test Allocate

@@ -1,0 +1,43 @@
+                                                                            Dimensions and Formatting 
+                                                                                                                                                                                           45
+ 
+  
+The attribute ‘Field’ is used to create fields containing one o r more fields, like Group fields. We
+can create multiple fields inside a single field , using the ‘Fields’ attribute. The attribute ‘Fields’ is
+useful when multiple Fields are required to be repeated in a Li ne. For example, in case of a Trial
+Balance, two Fields, i.e., Debits and Credits, are required to be repeated together if a new column
+is added by a user. The new column thus added, should again contain both these fields, i.e., Debit
+and Credit. In a Line Definition, only one Field can be repeate d. So, a Field is required within a
+Field if more than one field requires to be repeated.
+Align
+The attribute ‘Align’ aligns the contents of a Field as specifi ed. The permissible values for this
+attribute are Left, Center, Right, Justified and Prompt.
+Syntax
+Align : <String Value>
+Example:
+Align : Right
+Horizontal Align and Vertical Align
+‘Horizontal Align’ sets the alignment of the Form or Part horiz ontally while ‘Vertical align’ sets the
+alignment of the Form vertically.
+Syntax
+Horizontal Align      : <Logical Value> 
+Vertical Align        : <Logical Value>
+Example:
+Horizontal Align   : Right 
+Vertical Align     : Bottom
+;; Only for Form Definition
+The alignment of the Form or Part across the width of the page is set by the attribute ‘Horizontal
+Align’. The default alignment of the Form and Part is in the Ce ntre of the screen, and on the Left
+on printing. Depending on the width of the Form and page , the Form or Part will be displayed or 
+printed, leaving equal amount of space on the left and right of the Form.
+The alignment of the Form across the height of the page is set by the attribute ‘Vertical Align’. The
+default alignment of the Form is Centre of the screen, and T op on print. Depending on the height
+of the form and page, the form will be displayed or printed , leaving equal amount of space on the
+top and bottom of the form.
+Widespaced
+This attribute is used in a ‘Field’ Definition to allow increas ed spacing between the characters of
+the string value specified in the field. It is used to create titles for the report/columns.
+Syntax
+Widespaced : <Logical Value>
+Example:
+Widespaced : Yes

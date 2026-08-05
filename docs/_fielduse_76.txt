@@ -1,0 +1,23 @@
+                                                                             Objects and Collections
+                                                                                                                                                                                           65
+ 
+  
+1.2  T ally Objects T ypes
+Objects in TDL are classified into two types, based on the their usage and behaviour, as follows:
+ Interface Objects
+ Data Objects
+Interface objects define the user interface while Data objects store the value in the T ally Primary
+or Secondary database. Any data manipulation operation on the data object is performed through
+Interface objects only. Figure 6.2 shows the classification of objects in TDL.
+ Figure 6.2  Classification of Objects
+Interface Objects
+Objects used for designing the User Interface are referred to a s Interface objects. Report, Form,
+Menu, etc., are interface objects . Interface objects like Report and Menu are independent items
+and can exist on their own . The objects Form, Part, Line, Field can’t exist independently . They
+must follow the containment hierarchy as mentioned in the secti on ‘Basic TDL Structure’ of
+Lesson 2 – ‘TDL Components’.
+Example:
+[Field : Sample Fld]
+Width : 22
+[Line : Sample Ln] 
+Field : Name Field

@@ -1,0 +1,66 @@
+;; ============================================================================
+;; 07_label_report.tdl — ONE complete sticker
+;;
+;; Content: barcode bars, item name, MRP, rate
+;; (Alias text under bars so the code is readable / scannable as Code39)
+;; ============================================================================
+
+[Style: JGLabelBarsStyle]
+    Font   : "Libre Barcode 39"
+    Height : 28
+
+[Report: JGLabelReport]
+    Title : "Barcode Label"
+    Form  : JGLabelForm
+
+[Form: JGLabelForm]
+    Part : JGLabelPart
+
+[Part: JGLabelPart]
+    Lines    : JGLabelBarsLine, JGLabelAliasLine, JGLabelNameLine, JGLabelMrpLine, JGLabelRateLine
+    Vertical : Yes
+
+[Line: JGLabelBarsLine]
+    Fields : JGLabelBarsFld
+
+[Line: JGLabelAliasLine]
+    Fields : JGLabelAliasFld
+
+[Line: JGLabelNameLine]
+    Fields : JGLabelNameFld
+
+[Line: JGLabelMrpLine]
+    Fields : JGLabelMrpFld
+
+[Line: JGLabelRateLine]
+    Fields : JGLabelRateFld
+
+[Field: JGLabelBarsFld]
+    Use    : Name Field
+    Set As : "*" + ##JGPrintAlias + "*"
+    Style  : JGLabelBarsStyle
+
+[Field: JGLabelAliasFld]
+    Use    : Name Field
+    Set As : ##JGPrintAlias
+    Style  : Tiny Bold
+    Align  : Centre
+
+[Field: JGLabelNameFld]
+    Use    : Name Field
+    ;; Manual p.46 example uses start index 0: $$StringPart(...):0:5
+    Set As : $$StringPart:##JGPrintItemName:0:24
+    Style  : Tiny
+    Align  : Centre
+
+[Field: JGLabelMrpFld]
+    Use    : Name Field
+    Set As : "MRP : " + ##JGPrintMRP
+    Style  : Tiny
+    Align  : Centre
+
+[Field: JGLabelRateFld]
+    Use    : Name Field
+    Set As : "Rate : " + ##JGPrintRate
+    Style  : Tiny
+    Align  : Centre

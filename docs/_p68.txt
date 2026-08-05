@@ -1,0 +1,39 @@
+                                                                            Variable, Buttons and Keys 
+                                                                                                                                                                                           57
+ 
+  
+Syntax
+[Variable : <Variable Name>] 
+   Volatile : <Logical Value>
+Example:
+[Variable : GroupName] 
+Type        : String
+Volatile    : Yes
+The ‘Volatile’ attribute of Group Name V ariable is set to YES, which means that the variable
+‘Group Name’ can store multiple values, which have been received from multiple reports.
+Repeat
+This attribute is mainly used to achieve the Auto Column behavi our in various Reports . E a c h
+Column is created with a subsequent Object in a Collection auto matically, till all the columns
+required for Auto Columns exhaust. The ‘Repeat’ attribute has i ts value as a variable which has
+the collection of Objects, for which the columns need to be gen erated. Every time the Repeat is
+executed, the column for the subsequent Object is added.
+Syntax
+[Variable : <Variable Name>]
+   Repeat : <Variable Value>
+Example:
+[Variable : SV FromDate]
+Type       : Date
+Volatile   : Yes
+Repeat     : ##DSPRepeatCollection
+##DSPRepeatCollection V ariable receives the Collection Name from a Child Report, whic h
+accepts inputs from the user regarding the columns required. V a riable SVFromDate gets
+repeated over the subsequent period in the Collection each time the column repeats.
+1.2  The Scope of a Variable
+The scope of a V ariable can be broadly classified as follows:
+ Local
+ Global
+ Field acting as a variable
+Local
+A V ariable is termed as a local variable when it is associated to a Report. This means that the
+scope of the variable covers only the current report and its co mponents. It is not mandatory for
+local variables to have an initial value.

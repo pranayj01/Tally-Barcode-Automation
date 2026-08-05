@@ -1,0 +1,39 @@
+                                                                                                 User Defined Functions 
+                                                                                                                                                                                           279
+ 
+  
+<Parameter List> is the list of parameters accepted by the function.
+Example:
+Calling the User Defined Function at Field using $$
+[Field : Call Function]
+Use    : Number Field
+Set as : $$FactorialOf:#InputFld
+6. Function Execution – Object Context
+We all are aware that in TDL, any function, method or formula gets evaluated in the current object
+context. All the platform defined functions will be executed wi th the current object and requestor
+context.
+With the introduction of User Defined Functions, another type o f context is introduced. This is
+known as the target context.
+6.1  T arget Object Context
+T arget Context mainly refers to the object context which can be  set inside the function, which
+allows the function to perform manipulation operations for that object, i.e., alteration and creation.
+The object context of the caller and target object context can be different. It will now be possible to
+obtain the values from the caller object context and alter the values of the target object with those
+values.
+The User has the option to override the context within the func tion later or use the same context
+being passed. He can change the current and target object at any point and also switch target and
+current object to each other.
+$$TgtObject is used to evaluate the value of an expression in the context of the target object.
+6.2  Parameter Evaluation Context
+It is important to note that the parameter values which are pas sed to the functions are always
+evaluated in the context of the caller . Parameter specification within the functions is just to
+determine the data type, order and number of parameters. These are basically the place- holders
+for values passed from caller object context. The target object context or context switch within the
+function does not affect the initial values of the parameters. Later, within the function, these values
+can be altered just like ordinary variables.
+6.3  Return Value Evaluation
+We have already discussed above that function can return a valu e. This can be specified by the
+function by indicating the data type of the value it returns, n o specification as sumed as a void
+function (a function which does not return a value). Each statement (Actions discussed in the next
+During T ally Startup, T ally executes a function with the name “T allyMAIN”
+Internal functions always override if both exist in the same name.

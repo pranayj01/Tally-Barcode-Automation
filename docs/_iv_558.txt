@@ -1,0 +1,30 @@
+What’s New in Release 1.8
+548
+extern “C” HRESULT   declspec(dllexport)
+TDLCollection (const wchar_t * pInputParam, 
+const wchar_t * pInputXML, 
+wchar_t ** pXMLCollection,
+long * pCollectionSize)
+{
+*pCollectionSize = 1024;
+if ((*pXMLCollection = (wchar_t *)
+(CoTaskMemAlloc (*pCollectionSize * sizeof(wchar_t))))== NULL)
+{
+return -1;
+}
+wcscpy (*pXMLCollection,L"<EmpCollection>\
+<Emp>\
+<Name>Emp1</Name>\
+<EmpId>101</EmpId>\
+<Designation>Manager</Designation>\
+</Emp>\
+<Emp>\
+<Name>Emp2</Name>\
+<EmpId>102</EmpId>\
+< Designation >Senior Manager</Designation>\
+</Emp>\
+</EmpCollection>"\
+);
+In this example, there are different inputs given as parameters to the function TDLCollection.
+ pInputParam: It is an input value to the DLL and is a string value of coll ection attribute 
+“Input Parameter”. The TDL passes an input parameter to the DLL.

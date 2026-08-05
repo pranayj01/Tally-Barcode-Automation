@@ -1,0 +1,42 @@
+                                                                                                                                                                                             39
+Dimensions and Formatting
+Introduction
+Dimensions are specifications. Dimensions in TDL are effective either in Display mode or in Print
+mode. Data in TDL does not have an absolute position of the dim ensions specified, but relative .
+There are four  definitions in TDL that attract dimensions. They are FORM, PA R T, LINE and
+FIELD.
+1. Unit of Measurement
+A Unit of Measurement can be any of the following:
+ Millimeters/mms
+ Centimeters/cms
+ Inch(es)
+ Number of Characters/Number of Lines
+ % Screen/Page
+ Number – Points (where 1 Point = 1/72 Inch)
+2. Dimensional Attributes
+Dimensional Attributes can be classified into two, i.e., Specific and General Attributes.
+ Table 4.1  Dimensional Attributes
+The various dimensional attributes are as shown in the T able 4.1
+2.1  Sizing/Size Attributes
+Height and Width
+The attribute ‘Height’ is used to specify the Height required f or the Form, Part and Line
+Definitions, whereas the attribute ‘Width’ is used to specify t he Width required for the Form, Part
+and Field Definitions. The Height and Width can be specified in ter ms of any of the above Units
+Definitions Specific Dimensions General Dimensions
+Form Height, Width, Space T op,
+Space Bottom, Space Left,
+HorizontalAlign,Vertical Align, Full
+Height, Full Width
+Part Height, Width, Space T op,
+Space Bottom, Space Left,
+Space Right
+H o r i z o n t a l  A l i g n ,  T o p  P a r t s , 
+Bottom Parts, Left Parts,  Right
+Parts
+Line Height,SpaceT op,Space
+Bottom, Indent
+FullHeight,T opLine, Bottom Line
+Field W i d t h ,  S p a c e  L e f t ,  S p a c e
+Right, Indent
+Full Width, Left Field, Right  Field,
+Widespaced

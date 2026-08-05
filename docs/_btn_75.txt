@@ -1,0 +1,13 @@
+Objects and Collections
+64
+ Figure 6.1  T ally Object Structure
+Everything in TDL is an Object. As mentioned in the earlier cha pters, Report, Menu, Company,
+Ledger, etc., all are objects in TDL . The properties of objects in TDL are called Attributes. For
+example, the attributes ‘Object’, ‘Title’, ‘Form’ are all properties that define the ‘Report’ object.
+An object can have Methods and Collections, as mentioned earlie r. F o r  e x a m p l e ,  t h e  O b j e c t
+‘Ledger’ contains the Methods ‘Name’, ‘Parent’, etc ., and the collections ‘Address’ and
+‘BillwiseDetails’.
+As shown in the Figure 6.1, the Objects available at Level 1 are referred to as Primary objects and
+objects which are at Level 2-n are referred to as Secondary objects.
+Two different types of objects are available in TDL. The follow ing section describes the
+classification of objects in TDL.

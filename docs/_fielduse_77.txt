@@ -1,0 +1,33 @@
+Objects and Collections
+66
+TDL allows a re-usage of all the objects.There are two ways to obtain some more properties that
+are required in an object:
+ The existing object can either be used in new objects or in lieu of defining a new object.
+ The existing object can be modified to add new properties.
+The interface objects can be shared by other interface objects. For example, a single field can be
+used in multiple lines. The following examples describe the discussed scenarios:
+Example: 1
+   [Field  : Sample Fld]
+   Width  : 22
+   Set As : “TDL Demo” 
+   [#Field : Sample Fld]
+   Style  : Normal Bold
+The field Sample Fld will have both the properties. The width of the field is 22 and  t e x t  i s
+displayed using the style Normal Bold.
+Example: 2
+    [Field : Sample Fld]
+    Width : 22
+    Set As : “TDL Demo”
+ [Field : Sample Fld1]
+ Use   : Sample Fld
+ Style : Normal Bold
+The field Sample Fld1 will have both the properties. The width of the field is 22 and  the text is
+displayed using the style Normal Bold.
+Example: 3
+     [Line : TitleA]
+     Field : Name Field
+     [Line : TitleB]
+     Field : Name Field
+The field Name Field is used in both the lines TitleA and TitleB.
+A set of available attributes of interface objects are predefin ed by the platform. A new attribute
+can not be created for an interface object.

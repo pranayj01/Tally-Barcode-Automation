@@ -1,0 +1,33 @@
+Variables, Buttons and Keys 
+58
+Syntax
+[Report : <Report Name>] 
+     Variable : <Variable Name>
+Example:
+[Report : Balance Sheet] 
+Variable : Explode Flag
+Explode Flag V ariable is made local to the Report ‘Balance Sheet’ by associating it using the
+Report attribute ‘V ariable’.This variable retains its value as long as we work with this Report. On
+exiting the Report, the original value if given, is returned an d the value modified within this report 
+is lost. For example, consider a situation where ‘Stock Summary ’ Report is being viewed with
+Opening, Inwards, Outwards and Closing Columns enabled through Configuration settings. Once
+we quit this Report and re-enter the Report, the variables return to the default settings.
+Global
+A variable is termed as Global variable when it is defined under System V ariable section. It means
+that the scope of the variable covers all reports. An initial value is mandatory for global variables.
+Syntax
+[System : Variable]
+    Variable : <Initial Type Based Value>
+Example:
+[System : Variable] 
+BSVerticalFlag : No
+The BSVerticalFlag V ariable is made Global. Hence, this variable value being modif ied in a 
+Report is retained, even after we quit and re-enter the Report.  The retention of a Global V ariable
+can be done on two levels, i.e., either within the current sess ion or across the sessions. If the 
+Variable attribute ‘Persistent’ is set to YES, then the modifie d variable value is retained across
+the sessions, else the value defaults back to initial value on re-entering another session of T ally . 
+A Global Variable can also be made local to a Report by associating it to a Report , as
+discussed in Local Variables above.
+All the Persistent Variable Values are stor ed in a File Named T allySav .Cfg, in the
+folder path specified in T ally .ini. Each time T ally is restarted, these variable
+values are  accessed from this file.

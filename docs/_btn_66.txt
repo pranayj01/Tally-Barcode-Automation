@@ -1,0 +1,33 @@
+                                                                                                                                                                                             55
+Variables, Buttons and Keys
+Introduction
+A Variable is a storage location or an entity . It is a value that can change , depending on the
+conditions or on the information passed to the program.
+The actions in TDL can be delivered in three ways: by activating a Menu Item, by pressing a Key 
+or by activating a Button.
+The definitions of both Buttons and Keys are the same, but at the time of deployment, Keys differ
+from Buttons.
+1. Variable
+In TDL, a V ariable is one of the important definitions, since it helps  to control the behaviour of
+Reports and their contents. V ariables assume different values during execution and these values
+affect the behaviour of the Reports.
+A V ariable definition is similar to any other definition.
+Syntax
+[Variable : <Variable Name>] 
+    Attribute : Value
+A V ariable should be given a meaningful name which determines its purpose.
+1.1  Attributes of a Variable
+The attributes of a V ariable determine its nature and behaviour . Some of the widely used
+attributes are discussed below:
+Ty p e
+This attribute determines the Type of the value that will be he ld by the variable. The Types of
+values that a variable can handle are String, Logical, Date and  Number. In the absence of this
+attribute, a variable assumes to be of the Type String, by default.
+Syntax
+[Variable : <Variable Name>] 
+Type : <Data Type>
+Example:
+[Variable : ICFG Supplementary] 
+Type   : Logical
+A logical variable ICFG Supplementary is defined and used to control the behaviour of certain 
+reports, based on its logical value, as configured by the user.

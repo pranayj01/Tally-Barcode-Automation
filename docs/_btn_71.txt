@@ -1,0 +1,28 @@
+Variables, Buttons and Keys 
+60
+1.4  Example - Variables
+The following code snippet explains the usage of Local variable.
+[Variable : LocVar] 
+Type        : String
+Default     : "This is the default value"
+;; Variable LocVar of T ype String is defined and it is assigned a Default Value
+[Report : Local Variable] 
+Variable : LocVar
+;; At this point, Variable LocVar becomes a Local Variable for this Report
+[Field : Local Variable Field]
+Set As      : "This is a Local Variable in Report" 
+Modifies    : LocVar
+;; Here, the variable value is modified with the Field contents specified in ‘Set As’
+In this code snippet, a local variable LocVar is defined and locally attached to the Report ‘Local
+V ariable’. This Report modifies the V ariable V alue to ‘This is a Local Variable in Report’ . Once
+we exit from this Report, the value of the variable locvar modified in this Report is lost.
+2. Buttons and Keys
+The actions in TDL can be delivered in three ways - by activating a Menu Item, by pressing a Key
+or by activating a Button.
+The definition of both Buttons and Keys are the same, but at th e time of deployment, Keys differ
+from Buttons.
+All the Buttons used within the attribute ‘Buttons’ are visible on the button bar, so that the user can
+either click it or press the unique key combination. All the Bu ttons used within the attribute ‘Keys’
+are invisible entities and the key combination associated in the Key must be pressed to activate a 
+key; whereas to activate a button, either it can be clicked or the key combination assigned for the
+button can be pressed.

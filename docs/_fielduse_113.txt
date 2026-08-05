@@ -1,0 +1,35 @@
+Actions in TDL 
+102
+Fields : Short Prompt, Name Field
+Local  : Field : Short Prompt : Info    : "Name :" 
+Local  : Field : Name Field   : Storage : Name
+/* Storing value entered by user in Internal Method Name available within Object associated at Report*/
+[Line : Store LedgerGroup]
+Fields : Short Prompt, Name Field
+Local  : Field : Short Prompt : Info    : "Under :"
+Local  : Field : Name Field   : Storage : Parent
+Local  : Field : Name Field   : Table   : Group
+/* Similarly, Parent Method is stored with the user  entered value which is cons idered as the Group of the 
+Ledger created. Also Group is a default Table/Collection to display all the default as well as the user defined 
+Groups. Field Attribute Table helps to restrict the user input to a predefined list*/.
+In this example:
+ The Default Menu Gateway of T ally has been altered to add a new Item ‘Ledger Creation’, 
+which allows the user to create a Ledger.
+ Report Create Ledger associates the Object ‘Ledger’ to it , which indicates that the
+Report is meant for creating an instance of the Object ‘Ledger’.
+ Name and Group of the Ledger are stored in Internal Methods Name and Parent.
+Example:
+;; The following code demonstrates the usage of ‘Alter’ Action at Button
+[Button : My Reco Button]
+;; Button meant to do Bank Reconciliation
+Key    : Alt + F5
+Action : Alter : Bank Recon
+;; ‘Alter’ Action to trigger Bank Recon Report in ‘Alter’ Mode
+Title  : “Reconcile”
+;; Associating the Button to the Report
+[Form : My Bank Vouchers] 
+Button : My Reco Button
+In this example:
+ Button My Reco Button is defined with ‘Alter’ action to alter the Report Bank Recon on
+pressing the Alt + F5 Key. It is used for entering dates in the Bank Reconciliation Report.
+ The Button My Reco Button is associated to the Form My Bank V oucher

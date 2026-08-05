@@ -1,0 +1,36 @@
+                                                                            Dimensions and Formatting 
+                                                                                                                                                                                           47
+ 
+  
+the Credit Column and the Width is not utilized allowing the ot her fields to utilize the space. The 
+Credit T otals being calculated and printed will also exclude the Debit Amount.
+4. Definitions and Attributes for Formatting
+4.1  Definition - Border
+The Definition ‘Border’ determines the type of lines required i n a border which can be used by a
+Part, Line or a Field; which means that this definition can def ine customized borders for the user.
+But, it is ideal to use predefined borders, which are part of d efault TDL, instead of user defined
+ones, since almost all possible border combinations are already defined in the Default TDL.
+Syntax
+[Border : <Border Name>]
+     Top      : <Values separated by a comma>
+     Bottom    : <Values separated by a comma>  
+     Left     : <Values separated by a comma>  
+     Right      : <Values separated by a comma>
+     Color      : <Color Name – B&W, Color Name - Color>
+     PrintFG    : <Color Name>
+Attributes - T op, Bottom, Left and Right
+The T op, Bottom, Left and Right attributes in a ‘Border’ Defini tion are used to add appropriate
+lines which constitute the Border defined. The permissible values for these attributes are:
+ Thin/Thick: This specifies whether the Line should be thin or thick.
+ Flush: The border includes the spaces on the T op, Bottom, Left or Right.
+ Full Length : This ignores the space given at the T op, Bottom, Left or Righ t and  prints 
+the border for the whole length.
+ Double: It forces double line to be printed. In its absence, single line is assumed.
+Example:
+[Border : Thin Bottom Right Double] 
+Bottom      : Thin, Flush, Full Length 
+Right       : Thin, Double
+[Field : Total Field]
+Set AS      : $Total
+Border      : Thin Bottom Right Double
+In a Report, at least one Part, Line and Field should be visible.

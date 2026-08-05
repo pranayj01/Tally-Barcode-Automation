@@ -1,0 +1,44 @@
+                                                                            Dimensions and Formatting 
+                                                                                                                                                                                           43
+ 
+  
+Definitions, whereas attributes ‘Left Parts’ and ‘Right Parts’ can be specified only in the ‘Part’
+Definition.
+Syntax
+Top Parts         : <Part1, Part2, ….> 
+Bottom Parts      : <Part1, Part2, ….>
+Left Parts        : <Part1, Part2, ….> 
+;; Only for Part Definition 
+Right Parts       : <Part1, Part2, ….> 
+;; Only for Part Definition
+Example:
+Top Parts      : ACLSFixedLed, TDSAutoDetails 
+Bottom Parts   : PJR Sign
+Left Parts     : EXPINV Declaration
+;; Attribute ‘Left Parts’ can be used only for ‘Part’ Definition
+Right Parts    : STKVCH Address
+;; Attribute ‘Right Parts’ can be used only for ‘Part’ Definition
+Top Parts and Bottom Parts – Form Definition
+In cases where the T op Part or Bottom Part is specified within a Form Definition, it occupies the
+T op Section or Bottom Section of the Form respectively, keeping in account the Space T op and
+Space Bottom of the Form. The attribute Space Bottom impacts the Bottom Parts by moving them
+from the bottom, in order to leave appropriate spaces. Similarl y, Space T op impacts the T op Parts
+by moving them from the top, in order to leave appropriate spac es. The Bottom Parts/Bottom
+Lines start printing from bottom to the top of the Form. If Height is specified at the Form Definition,
+then the Bottom Parts/Lines start printing from the bottommost line within the specified Height.
+Top Parts, Bottom Parts, Left Parts and Right Parts – Part Definition
+In cases where the Left Part or Right Part is specified within a Part Definition, it occupies the Left
+Section or Right Section of the Part respectively, keeping in view the Space Left and Space Right of
+the Part. The attribute Space Right impacts the Right Parts by moving them from Right, in order to
+leave appropriate spaces. Similarly, Space Left impacts the Left Parts by moving them from
+Left, in order to leave appropriate spaces. If the intent is to have multiple parts printed horizontally,
+then the Part Attribute ‘Vertical’ should be set to NO. In case s where the ‘Vertical’ Attribute is set
+to YES, all the parts within this part will be printed vertical ly. I n  s u c h  c a s e s, the Left Parts will
+position at the T op of the Screen/Page and the Right Parts at the Bottom of the Screen/Page.
+In cases where the T op Part or Bottom Part is specified within a Part Definition, it occupies the T op
+Section or Bottom Section of the Part respectively , keeping Space T op and Space Bottom of the
+Part in account. The attribute Space Bottom impacts the Bottom Parts by moving them from the
+bottom in order to leave appropriate space. Similarly , t h e  a t t r i b u t e  S p a c e  T o p  i m p a c t s  t h e  T o p
+Parts by moving them from the T op in order to leave appropriate spaces. If the intent is to have
+multiple parts printed vertically, then the Part Attribute Vertical should be set to Y es. If the Vertical
+Attribute is set to No, then all the parts within this part wil l be printed horizontally . In such

@@ -1,0 +1,20 @@
+Variables, Buttons and Keys 
+62
+Inactive
+The Inactive attribute is used to activate the Button, based on  some condition. If the condition is
+FALSE, the button will be displayed, but it cannot be activated.
+Syntax
+[Key/Button : <Key/Button Name>] 
+    Inactive : <Logical Condition>
+Example:
+[Button : Close Company] 
+Inactive : $$SelectedCmps < 1
+Learning Outcome
+ A variable is a storage location or an entity . It is a value that can change, depending  
+either on the conditions or on the information passed on to the program.
+ The V ariable attribute ‘Type’ determines the Type of value that will be held within it.
+ The attribute ‘Default’ is used to assign a default value to a variable, based on the ‘Type’ 
+defined.
+ The attribute ‘Persistent’ decides the retention periodicity of the attribute.
+ The attribute ‘Modifies’ in a Field definition is used to modify the value of a variable.
+ ‘Title’, ‘Key’, ‘Action’ and ‘Inactive’ are the attributes of ‘Button’ definition.

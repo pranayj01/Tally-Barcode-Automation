@@ -1,0 +1,309 @@
+;; ============================================================================
+;; 02_functions.tdl — Barcode generation functions ONLY
+;;
+;; This module contains NO UI definitions.
+;; Diagnostics live in 09_diagnostics.tdl.
+;;
+;; ARCHITECTURE (FINAL):
+;;   Generated code is intended for Stock Item Alias (native Tally field).
+;;   These functions RETURN a barcode string — they do not write Alias.
+;;   Writing Alias is Purchase / Stock Item workflow responsibility.
+;;
+;; Format: {COMPANY_INITIALS}{YY}{7_DIGIT_SEQUENCE}
+;; Example: SJ260000001
+;;
+;; Rules:
+;;   - Initials derived dynamically from ##SVCurrentCompany (never configured)
+;;   - YY from $$YearOfDate:##SVCurrentDate (last two digits)
+;;   - Sequence is per-company and year-scoped (resets when YY changes)
+;;   - Never reuse a sequence number within the same company+year
+;;
+;; Contains: System Formula, Variables, Functions
+;; Depends on: 01_udf.tdl (Company sequence UDFs)
+;; ============================================================================
+
+;; --------------------------------------------------------------------------
+;; Module formulas (no company prefix — prefix is always derived)
+;; --------------------------------------------------------------------------
+
+[System: Formula]
+    JGBarcodeSeqLength : 7
+
+;; --------------------------------------------------------------------------
+;; Working variables (function scratch only)
+;; --------------------------------------------------------------------------
+
+[System: Variable]
+    JGWorkBarcode    : String
+    JGInitLetter1    : String
+    JGInitLetter2    : String
+    JGInitFirstWord  : String
+    JGInitCount      : Number
+    JGInitDone       : Logical
+
+[Variable: JGWorkBarcode]
+    Type    : String
+    Default : ""
+
+[Variable: JGInitLetter1]
+    Type    : String
+    Default : ""
+
+[Variable: JGInitLetter2]
+    Type    : String
+    Default : ""
+
+[Variable: JGInitFirstWord]
+    Type    : String
+    Default : ""
+
+[Variable: JGInitCount]
+    Type    : Number
+    Default : 0
+
+[Variable: JGInitDone]
+    Type    : Logical
+    Default : No
+
+;; ==========================================================================
+;; Character / word helpers
+;; ==========================================================================
+
+[Function: JG Upper Char]
+    ;; A–Z unchanged; a–z → A–Z; all other characters unchanged
+    Parameter : pCh : String
+    Variable  : A : Number
+    01 : Set : A : $$ASCIICode:##pCh
+    02 : IF : ##A >= 97 AND ##A <= 122
+    03 :   RETURN : $$Char:(##A - 32)
+    04 : ENDIF
+    05 : RETURN : ##pCh
+
+[Function: JG Is Upper Letter]
+    ;; Yes if character is A–Z
+    Parameter : pCh : String
+    Variable  : A : Number
+    01 : Set : A : $$ASCIICode:##pCh
+    02 : IF : ##A >= 65 AND ##A <= 90
+    03 :   RETURN : Yes
+    04 : ENDIF
+    05 : RETURN : No
+
+[Function: JG Is Noise Word]
+    ;; Legal / filler tokens ignored when deriving initials
+    Parameter : pWord : String
+    01 : IF : ##pWord = "THE" OR ##pWord = "AND" OR ##pWord = "&"
+    02 :   RETURN : Yes
+    03 : ENDIF
+    04 : IF : ##pWord = "M/S" OR ##pWord = "M/S." OR ##pWord = "MS" OR ##pWord = "MESSRS"
+    05 :   RETURN : Yes
+    06 : ENDIF
+    07 : IF : ##pWord = "PVT" OR ##pWord = "LTD" OR ##pWord = "LLP" OR ##pWord = "LLC"
+    08 :   RETURN : Yes
+    09 : ENDIF
+    10 : IF : ##pWord = "CO" OR ##pWord = "COMPANY"
+    11 :   RETURN : Yes
+    12 : ENDIF
+    13 : RETURN : No
+
+[Function: JG Word Starts With Letter]
+    Parameter : pWord : String
+    Variable  : Ch : String
+    01 : IF : $$IsEmpty:##pWord
+    02 :   RETURN : No
+    03 : ENDIF
+    04 : Set : Ch : $$StringPart:##pWord:1:1
+    05 : RETURN : $$JG Is Upper Letter:##Ch
+
+[Function: JG First Two Letters]
+    ;; From a single significant word: first two A–Z letters; pad with X if only one
+    Parameter : pWord : String
+    Variable  : A : String
+    Variable  : B : String
+    Variable  : i : Number
+    Variable  : Len : Number
+    Variable  : Ch : String
+    Variable  : N : Number
+    01 : Set : Len : $$StringLength:##pWord
+    02 : Set : i : 1
+    03 : Set : N : 0
+    04 : Set : A : ""
+    05 : Set : B : ""
+    06 : WHILE : ##i <= ##Len AND ##N < 2
+    07 :   Set : Ch : $$StringPart:##pWord:##i:1
+    08 :   IF : $$JG Is Upper Letter:##Ch
+    09 :     IF : ##N = 0
+    10 :       Set : A : ##Ch
+    11 :       Set : N : 1
+    12 :     ELSE
+    13 :       Set : B : ##Ch
+    14 :       Set : N : 2
+    15 :     ENDIF
+    16 :   ENDIF
+    17 :   Set : i : ##i + 1
+    18 : END WHILE
+    19 : IF : ##N = 2
+    20 :   RETURN : ##A + ##B
+    21 : ENDIF
+    22 : IF : ##N = 1
+    23 :   RETURN : ##A + "X"
+    24 : ENDIF
+    25 : RETURN : "XX"
+
+[Function: JG Init Reset]
+    01 : Set : JGInitLetter1 : ""
+    02 : Set : JGInitLetter2 : ""
+    03 : Set : JGInitFirstWord : ""
+    04 : Set : JGInitCount : 0
+    05 : Set : JGInitDone : No
+
+[Function: JG Init Consume Word]
+    ;; Fold one token into JGInit* state (noise ignored)
+    Parameter : pWord : String
+    01 : IF : $$IsEmpty:##pWord OR ##JGInitDone = Yes
+    02 :   RETURN
+    03 : ENDIF
+    04 : IF : $$JG Is Noise Word:##pWord
+    05 :   RETURN
+    06 : ENDIF
+    07 : IF : NOT $$JG Word Starts With Letter:##pWord
+    08 :   RETURN
+    09 : ENDIF
+    10 : IF : ##JGInitCount = 0
+    11 :   Set : JGInitLetter1 : $$StringPart:##pWord:1:1
+    12 :   Set : JGInitFirstWord : ##pWord
+    13 :   Set : JGInitCount : 1
+    14 :   RETURN
+    15 : ENDIF
+    16 : IF : ##JGInitCount = 1
+    17 :   Set : JGInitLetter2 : $$StringPart:##pWord:1:1
+    18 :   Set : JGInitCount : 2
+    19 :   Set : JGInitDone : Yes
+    20 : ENDIF
+
+[Function: JG Derive Company Initials]
+    ;; Always returns exactly 2 characters (A–Z / X fallback)
+    Variable : Name : String
+    Variable : Len : Number
+    Variable : i : Number
+    Variable : Ch : String
+    Variable : Word : String
+    01 : Set : Name : ##SVCurrentCompany
+    02 : IF : $$IsEmpty:##Name
+    03 :   RETURN : "XX"
+    04 : ENDIF
+    05 : Call : JG Init Reset
+    06 : Set : Len : $$StringLength:##Name
+    07 : Set : i : 1
+    08 : Set : Word : ""
+    09 : WHILE : ##i <= ##Len AND ##JGInitDone = No
+    10 :   Set : Ch : $$StringPart:##Name:##i:1
+    11 :   Set : Ch : $$JG Upper Char:##Ch
+    12 :   IF : ##Ch = " "
+    13 :     Call : JG Init Consume Word : ##Word
+    14 :     Set : Word : ""
+    15 :   ELSE
+    16 :     Set : Word : ##Word + ##Ch
+    17 :   ENDIF
+    18 :   Set : i : ##i + 1
+    19 : END WHILE
+    20 : IF : ##JGInitDone = No
+    21 :   Call : JG Init Consume Word : ##Word
+    22 : ENDIF
+    23 : IF : ##JGInitCount = 2
+    24 :   RETURN : ##JGInitLetter1 + ##JGInitLetter2
+    25 : ENDIF
+    26 : IF : ##JGInitCount = 1
+    27 :   RETURN : $$JG First Two Letters:##JGInitFirstWord
+    28 : ENDIF
+    29 : RETURN : "XX"
+
+;; ==========================================================================
+;; Year + padding + format
+;; ==========================================================================
+
+[Function: JG Current Year Number]
+    01 : RETURN : 26
+
+[Function: JG Current Year Suffix]
+    ;; Two-character zero-padded YY
+    Variable : N : Number
+    Variable : S : String
+    01 : Set : N : $$JG Current Year Number
+    02 : Set : S : $$String:##N
+    03 : IF : $$StringLength:##S < 2
+    04 :   Set : S : "0" + ##S
+    05 : ENDIF
+    06 : RETURN : ##S
+
+[Function: JG Pad Number]
+    ;; Zero-pad pNum to @@JGBarcodeSeqLength digits
+    Parameter : pNum : Number
+    Variable  : S : String
+    Variable  : Need : Number
+    01 : Set : S : $$String:##pNum
+    02 : Set : Need : @@JGBarcodeSeqLength - $$StringLength:##S
+    03 : WHILE : ##Need > 0
+    04 :   Set : S : "0" + ##S
+    05 :   Set : Need : ##Need - 1
+    06 : END WHILE
+    07 : RETURN : ##S
+
+[Function: JG Format Internal Barcode]
+    ;; Build Initials + YY + 7-digit sequence (value for Stock Item Alias)
+    Parameter : pNum : Number
+    Variable  : Initials : String
+    Variable  : YY : String
+    Variable  : Seq : String
+    01 : Set : Initials : $$JG Derive Company Initials
+    02 : Set : YY : $$JG Current Year Suffix
+    03 : Set : Seq : $$JG Pad Number:##pNum
+    04 : RETURN : ##Initials + ##YY + ##Seq
+
+;; ==========================================================================
+;; Sequence lifecycle (per company, year-scoped)
+;; ==========================================================================
+
+[Function: JG Ensure Company Sequence]
+    ;; Init counter, or reset when calendar YY changes
+    Variable : CurYY : Number
+    Variable : StoredYY : Number
+    Variable : Next : Number
+    01 : Set : CurYY : $$JG Current Year Number
+    02 : Set : StoredYY : $$Number:$JGSequenceYear:Company:##SVCurrentCompany
+    03 : Set : Next : $$Number:$JGNextSeq:Company:##SVCurrentCompany
+    04 : IF : $$IsEmpty:$JGSequenceYear:Company:##SVCurrentCompany OR ##StoredYY <> ##CurYY OR $$IsEmpty:$JGNextSeq:Company:##SVCurrentCompany OR ##Next < 1
+    05 :   New Object : Company : ##SVCurrentCompany
+    06 :   Set Value  : JGSequenceYear : ##CurYY
+    07 :   Set Value  : JGNextSeq : 1
+    08 :   Set Value  : JGHighestIssued : 0
+    09 :   Accept Alter
+    10 : ENDIF
+
+[Function: JG Allocate Next Barcode]
+    ;; Issue next barcode string for Alias; bump company counter; never reuse within year
+    Variable : Seq : Number
+    Variable : Code : String
+    01 : Call : JG Ensure Company Sequence
+    02 : Set : Seq : $$Number:$JGNextSeq:Company:##SVCurrentCompany
+    03 : IF : ##Seq < 1
+    04 :   Set : Seq : 1
+    05 : ENDIF
+    06 : Set : Code : $$JG Format Internal Barcode:##Seq
+    07 : New Object : Company : ##SVCurrentCompany
+    08 : Set Value  : JGNextSeq : ##Seq + 1
+    09 : Set Value  : JGHighestIssued : ##Seq
+    10 : Set Value  : JGSequenceYear : $$JG Current Year Number
+    11 : Accept Alter
+    12 : Set : JGWorkBarcode : ##Code
+    13 : RETURN : ##Code
+
+[Function: JG Peek Next Barcode]
+    ;; Next barcode string without consuming sequence
+    Variable : Seq : Number
+    01 : Call : JG Ensure Company Sequence
+    02 : Set : Seq : $$Number:$JGNextSeq:Company:##SVCurrentCompany
+    03 : IF : ##Seq < 1
+    04 :   Set : Seq : 1
+    05 : ENDIF
+    06 : RETURN : $$JG Format Internal Barcode:##Seq

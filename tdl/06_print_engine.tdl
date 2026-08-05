@@ -1,0 +1,149 @@
+;; ============================================================================
+;; 06_print_engine.tdl — launcher (no Display before print)
+;;
+;; Sticker mm sizes are HARDCODED in Module 08 for now (Safe IF/THEN mm
+;; formulas caused Bad formula!). Copies/start-from Sets remain here.
+;; ============================================================================
+
+[System: Variable]
+    JGPrintAlias      : String
+    JGPrintItemName   : String
+    JGPrintMRP        : String
+    JGPrintRate       : String
+    JGLabelsToPrint   : Number
+    JGStartFromLabel  : Number
+    JGLabelsPerRow    : Number
+    JGSetLabelWidth   : Number
+    JGSetLabelHeight  : Number
+    JGSetGapX         : Number
+    JGSetGapY         : Number
+    JGSetMarginTop    : Number
+    JGSetMarginLeft   : Number
+    JGSetBarcodeHt    : Number
+
+[Variable: JGPrintAlias]
+    Type    : String
+    Default : ""
+
+[Variable: JGPrintItemName]
+    Type    : String
+    Default : ""
+
+[Variable: JGPrintMRP]
+    Type    : String
+    Default : ""
+
+[Variable: JGPrintRate]
+    Type    : String
+    Default : ""
+
+[Variable: JGLabelsToPrint]
+    Type    : Number
+    Default : 15
+
+[Variable: JGStartFromLabel]
+    Type    : Number
+    Default : 1
+
+[Variable: JGLabelsPerRow]
+    Type    : Number
+    Default : 3
+
+[Variable: JGSetLabelWidth]
+    Type    : Number
+    Default : 60
+
+[Variable: JGSetLabelHeight]
+    Type    : Number
+    Default : 40
+
+[Variable: JGSetGapX]
+    Type    : Number
+    Default : 3
+
+[Variable: JGSetGapY]
+    Type    : Number
+    Default : 3
+
+[Variable: JGSetMarginTop]
+    Type    : Number
+    Default : 5
+
+[Variable: JGSetMarginLeft]
+    Type    : Number
+    Default : 5
+
+[Variable: JGSetBarcodeHt]
+    Type    : Number
+    Default : 28
+
+[Button: JGPrintBarcodeBtn]
+    Title  : "Print Barcode"
+    Key    : Ctrl + Alt + B
+    Action : Call : JGPrintBarcodeStart
+
+[#Form: Stock Item]
+    Add : Buttons : JGPrintBarcodeBtn
+
+;; Clamp layout vars before Print Report (Defaults alone are NOT trusted at preview)
+[Function: JGClampLayoutVars]
+    01 : IF : $$Number:##JGSetLabelWidth < 1
+    02 :   Set : JGSetLabelWidth : 60
+    03 : ENDIF
+    04 : IF : $$Number:##JGSetLabelHeight < 1
+    05 :   Set : JGSetLabelHeight : 40
+    06 : ENDIF
+    07 : IF : $$Number:##JGLabelsPerRow < 1
+    08 :   Set : JGLabelsPerRow : 3
+    09 : ENDIF
+    10 : IF : $$Number:##JGSetGapX < 0
+    11 :   Set : JGSetGapX : 3
+    12 : ENDIF
+    13 : IF : $$Number:##JGSetGapY < 0
+    14 :   Set : JGSetGapY : 3
+    15 : ENDIF
+    16 : IF : $$Number:##JGSetMarginTop < 0
+    17 :   Set : JGSetMarginTop : 5
+    18 : ENDIF
+    19 : IF : $$Number:##JGSetMarginLeft < 0
+    20 :   Set : JGSetMarginLeft : 5
+    21 : ENDIF
+    22 : IF : $$Number:##JGSetBarcodeHt < 1
+    23 :   Set : JGSetBarcodeHt : 28
+    24 : ENDIF
+    25 : IF : $$Number:##JGLabelsToPrint < 1
+    26 :   Set : JGLabelsToPrint : 1
+    27 : ENDIF
+    28 : IF : $$Number:##JGStartFromLabel < 1
+    29 :   Set : JGStartFromLabel : 1
+    30 : ENDIF
+
+[Function: JGPrintBarcodeStart]
+    Variable : Code : String
+    Variable : Item : String
+    Variable : Mrp  : String
+    Variable : Rate : String
+    01 : Set : Code : $$Alias
+    02 : Set : Item : $Name
+    03 : IF : $$IsEmpty:##Code
+    04 :   MSG BOX : "Print Barcode" : "No barcode available for this Stock Item."
+    05 :   RETURN
+    06 : ENDIF
+    07 : Set : Mrp  : $$String:$MRPDetails[Last].MRPRateDetails[Last].MRPRate
+    08 : Set : Rate : $$String:$StandardPrice
+    09 : Set : JGPrintAlias    : ##Code
+    10 : Set : JGPrintItemName : ##Item
+    11 : Set : JGPrintMRP      : ##Mrp
+    12 : Set : JGPrintRate     : ##Rate
+    13 : Set : JGStartFromLabel : 1
+    14 : Set : JGLabelsToPrint  : 15
+    15 : Set : JGLabelsPerRow   : 3
+    16 : Set : JGSetLabelWidth  : 60
+    17 : Set : JGSetLabelHeight : 40
+    18 : Set : JGSetGapX        : 3
+    19 : Set : JGSetGapY        : 3
+    20 : Set : JGSetMarginTop   : 5
+    21 : Set : JGSetMarginLeft  : 5
+    22 : Set : JGSetBarcodeHt   : 28
+    23 : Call : JGClampLayoutVars
+    24 : Print Report : JGLabelReport

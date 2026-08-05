@@ -1,0 +1,105 @@
+;; ============================================================================
+;; 04_purchase.tdl — MINIMAL SCOPE + company sequence
+;;
+;; On Purchase Form Accept:
+;;   Walk Inventory Entries
+;;   If Stock Item $$Alias is empty → assign next 7-digit sequence (0000001, 0000002, …)
+;;   Store next counter on Company UDF JGNextSeq (01_udf.tdl)
+;;   Never overwrite existing Alias
+;;
+;; No year / prefix / initials.
+;;
+;; LIVE-VERIFIED write: Insert Collection Object : Name + Set Value : Name + Accept Alter
+;; ============================================================================
+
+[System: Variable]
+    JGAliasItemName : String
+
+[Variable: JGAliasItemName]
+    Type    : String
+    Default : ""
+
+[Collection: JGStockItemByNameColl]
+    Type   : Stock Item
+    Filter : JGStockItemNameFilter
+
+[System: Formula]
+    JGStockItemNameFilter : $Name = ##JGAliasItemName
+
+[Function: JGPurcGetAlias]
+    Parameter : pItem : String
+    Variable  : Code : String
+    01 : IF : $$IsEmpty:##pItem
+    02 :   RETURN : ""
+    03 : ENDIF
+    04 : Set : JGAliasItemName : ##pItem
+    05 : Set : Code : ""
+    06 : Walk Collection : JGStockItemByNameColl
+    07 :   Set : Code : $$Alias
+    08 : End Walk
+    09 : RETURN : ##Code
+
+[Function: JGPurcPad7]
+    ;; Zero-pad to 7 digits → 0000001
+    Parameter : pNum : Number
+    Variable  : S : String
+    Variable  : Need : Number
+    01 : Set : S : $$String:##pNum
+    02 : Set : Need : 7 - $$StringLength:##S
+    03 : WHILE : ##Need > 0
+    04 :   Set : S : "0" + ##S
+    05 :   Set : Need : ##Need - 1
+    06 : END WHILE
+    07 : RETURN : ##S
+
+[Function: JGPurcNextCode]
+    ;; Company JGNextSeq → padded code; bump counter
+    Variable : Seq : Number
+    Variable : Code : String
+    01 : Set : Seq : $$Number:$JGNextSeq:Company:##SVCurrentCompany
+    02 : IF : $$IsEmpty:$JGNextSeq:Company:##SVCurrentCompany OR ##Seq < 1
+    03 :   Set : Seq : 1
+    04 : ENDIF
+    05 : Call : JGPurcPad7 : ##Seq
+    06 : Set : Code : $$LastResult
+    07 : New Object : Company : ##SVCurrentCompany
+    08 : Set Value  : JGNextSeq : ##Seq + 1
+    09 : Accept Alter
+    10 : RETURN : ##Code
+
+[Function: JGPurcSetAliasIfEmpty]
+    Parameter : pItem : String
+    Variable  : Existing : String
+    Variable  : Code : String
+    01 : IF : $$IsEmpty:##pItem
+    02 :   RETURN
+    03 : ENDIF
+    04 : Call : JGPurcGetAlias : ##pItem
+    05 : Set : Existing : $$LastResult
+    06 : IF : NOT $$IsEmpty:##Existing
+    07 :   RETURN
+    08 : ENDIF
+    09 : Call : JGPurcNextCode
+    10 : Set : Code : $$LastResult
+    11 : New Object : Stock Item : ##pItem
+    12 : Insert Collection Object : Name
+    13 : Set Value : Name : ##Code
+    14 : Accept Alter
+
+[Function: JGPurcOnAccept]
+    Variable : ItemName : String
+    01 : IF : NOT $$IsPurchase:$VoucherTypeName
+    02 :   IF : NOT $$IsEqual:$VoucherTypeName:"Purchase"
+    03 :     RETURN : Yes
+    04 :   ENDIF
+    05 : ENDIF
+    06 : Walk Collection : Inventory Entries
+    07 :   Set : ItemName : $StockItemName
+    08 :   IF : NOT $$IsEmpty:##ItemName
+    09 :     Call : JGPurcSetAliasIfEmpty : ##ItemName
+    10 :   ENDIF
+    11 : End Walk
+    12 : RETURN : Yes
+
+[#Form: Voucher]
+    On : Form Accept : Yes : Call : JGPurcOnAccept

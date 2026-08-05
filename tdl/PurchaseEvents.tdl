@@ -1,0 +1,83 @@
+;; ============================================================================
+;; PurchaseEvents.tdl — On Purchase voucher save:
+;;   • If Manufacturer Barcode exists → store it
+;;   • If internal Barcode empty → allocate JG######## (never reused)
+;;   • Prompt: Print Barcode Labels?
+;;   • Print 50x25mm labels via Tally (Windows / thermal driver)
+;; ============================================================================
+
+[#Form: Voucher]
+    On : Form Accept : Yes : Call : JG Native On Voucher Accept
+
+[Function: JG Native On Voucher Accept]
+    01 : IF : NOT @@JGBarcodeEnabled
+    02 :   RETURN : Yes
+    03 : ENDIF
+    04 : IF : $$IsPurchase:$VoucherTypeName OR $$IsEqual:$VoucherTypeName:"Purchase" OR $$IsEqual:$VoucherTypeName:"Purchase Order"
+    05 :   Call : JG Native Process Purchase
+    06 : ENDIF
+    07 : RETURN : Yes
+
+[Function: JG Native Process Purchase]
+    Variable : ItemName : String
+    Variable : Existing : String
+    Variable : Mfr : String
+    Variable : NewCode : String
+    Variable : Qty : Number
+    Variable : AnyDone : Logical
+    Variable : LabelBlob : String
+
+    01 : Call : JG Ensure Company Sequence
+    02 : Set : AnyDone : No
+    03 : Set : LabelBlob : ""
+    04 : Set : JGLabelList : ""
+
+    05 : Walk Collection : Inventory Entries
+    06 :   Set : ItemName : $StockItemName
+    07 :   IF : NOT $$IsEmpty:##ItemName
+    08 :     Set : Existing : $JGBarcode:StockItem:##ItemName
+    09 :     Set : Mfr : $JGManufacturerBarcode:StockItem:##ItemName
+    10 :     IF : $$IsEmpty:##Mfr
+    11 :       Set : Mfr : ""
+    12 :     ENDIF
+    13 :     IF : $$IsEmpty:##Existing
+    14 :       Set : NewCode : $$Call:JG Allocate Next Barcode
+    15 :       Call : JG Persist Item Barcode : ##ItemName : ##NewCode : ##Mfr
+    16 :       Set : Existing : ##NewCode
+    17 :       Set : AnyDone : Yes
+    18 :     ELSE
+    19 :       ;; Keep permanent barcode; still refresh manufacturer if provided on master
+    20 :       IF : NOT $$IsEmpty:##Mfr
+    21 :         New Object : Stock Item : ##ItemName
+    22 :         Set Value  : JGManufacturerBarcode : ##Mfr
+    23 :         Accept Alter
+    24 :       ENDIF
+    25 :       ;; Ensure encoded string exists for printing
+    26 :       IF : $$IsEmpty:$JGBarcodeEncoded:StockItem:##ItemName
+    27 :         Call : JG Persist Item Barcode : ##ItemName : ##Existing : ##Mfr
+    28 :       ENDIF
+    29 :     ENDIF
+    30 :     Set : Qty : $$Number:$BilledQty
+    31 :     IF : ##Qty < 1
+    32 :       Set : Qty : 1
+    33 :     ENDIF
+    34 :     ;; Pipe-delimited print queue: Item|Copies~
+    35 :     Set : LabelBlob : ##LabelBlob + ##ItemName + "|" + $$String:##Qty + "~"
+    36 :   ENDIF
+    37 : End Walk
+
+    38 : Set : JGLabelList : ##LabelBlob
+
+    39 : IF : $$IsEmpty:##LabelBlob
+    40 :   RETURN
+    41 : ENDIF
+
+    42 : IF : @@JGAskPrintOnPurchase
+    43 :   Query Box : "Print Barcode Labels?" : JGPrintLabelsChoice
+    44 :   IF : ##JGPrintLabelsChoice
+    45 :     Call : JG Print Label Queue
+    46 :   ENDIF
+    47 : ENDIF
+
+;; Print implementation lives in LabelPrint.tdl / bundled BarcodeAddon.txt
+;; (Function: JG Print Label Queue)
