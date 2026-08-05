@@ -1,114 +1,17 @@
 ;; ============================================================================
-;; 08_templates.tdl — fixed 3-column A4 label layout
+;; 08_templates.tdl — A4 3-column sheet repeating over JGLabelRowColl
 ;;
-;; Layout, sizes, gaps, margins and barcode rendering are unchanged.
-;; Only visibility is controlled by ##JGPrintCopies (1..100).
-;; Invisible Parts collapse to zero size, so no blank labels/rows follow.
+;; JGPrintLabelQueue packs JGLabelQueue into rows of 3 (JGLabelRows).
+;; This Form deletes the single-sticker Part and repeats one row Line
+;; per packed row — one preview / one print job for the whole voucher.
+;;
+;; LAYOUT RULE: the three stickers of a row are FIELDS on the same Line.
+;; Sub-Parts with "Vertical : No" rendered one below the other, so each
+;; sticker text row is a Line carrying three 60 mm fields instead.
+;;
+;; Unused slots in the last row are blanked by their own Set As
+;; (no "**" bars, no bare "MRP :" / "Rate :" labels).
 ;; ============================================================================
-
-[System: Formula]
-    JGHideCopy001 : $$Number:##JGPrintCopies < 1
-    JGHideCopy002 : $$Number:##JGPrintCopies < 2
-    JGHideCopy003 : $$Number:##JGPrintCopies < 3
-    JGHideCopy004 : $$Number:##JGPrintCopies < 4
-    JGHideCopy005 : $$Number:##JGPrintCopies < 5
-    JGHideCopy006 : $$Number:##JGPrintCopies < 6
-    JGHideCopy007 : $$Number:##JGPrintCopies < 7
-    JGHideCopy008 : $$Number:##JGPrintCopies < 8
-    JGHideCopy009 : $$Number:##JGPrintCopies < 9
-    JGHideCopy010 : $$Number:##JGPrintCopies < 10
-    JGHideCopy011 : $$Number:##JGPrintCopies < 11
-    JGHideCopy012 : $$Number:##JGPrintCopies < 12
-    JGHideCopy013 : $$Number:##JGPrintCopies < 13
-    JGHideCopy014 : $$Number:##JGPrintCopies < 14
-    JGHideCopy015 : $$Number:##JGPrintCopies < 15
-    JGHideCopy016 : $$Number:##JGPrintCopies < 16
-    JGHideCopy017 : $$Number:##JGPrintCopies < 17
-    JGHideCopy018 : $$Number:##JGPrintCopies < 18
-    JGHideCopy019 : $$Number:##JGPrintCopies < 19
-    JGHideCopy020 : $$Number:##JGPrintCopies < 20
-    JGHideCopy021 : $$Number:##JGPrintCopies < 21
-    JGHideCopy022 : $$Number:##JGPrintCopies < 22
-    JGHideCopy023 : $$Number:##JGPrintCopies < 23
-    JGHideCopy024 : $$Number:##JGPrintCopies < 24
-    JGHideCopy025 : $$Number:##JGPrintCopies < 25
-    JGHideCopy026 : $$Number:##JGPrintCopies < 26
-    JGHideCopy027 : $$Number:##JGPrintCopies < 27
-    JGHideCopy028 : $$Number:##JGPrintCopies < 28
-    JGHideCopy029 : $$Number:##JGPrintCopies < 29
-    JGHideCopy030 : $$Number:##JGPrintCopies < 30
-    JGHideCopy031 : $$Number:##JGPrintCopies < 31
-    JGHideCopy032 : $$Number:##JGPrintCopies < 32
-    JGHideCopy033 : $$Number:##JGPrintCopies < 33
-    JGHideCopy034 : $$Number:##JGPrintCopies < 34
-    JGHideCopy035 : $$Number:##JGPrintCopies < 35
-    JGHideCopy036 : $$Number:##JGPrintCopies < 36
-    JGHideCopy037 : $$Number:##JGPrintCopies < 37
-    JGHideCopy038 : $$Number:##JGPrintCopies < 38
-    JGHideCopy039 : $$Number:##JGPrintCopies < 39
-    JGHideCopy040 : $$Number:##JGPrintCopies < 40
-    JGHideCopy041 : $$Number:##JGPrintCopies < 41
-    JGHideCopy042 : $$Number:##JGPrintCopies < 42
-    JGHideCopy043 : $$Number:##JGPrintCopies < 43
-    JGHideCopy044 : $$Number:##JGPrintCopies < 44
-    JGHideCopy045 : $$Number:##JGPrintCopies < 45
-    JGHideCopy046 : $$Number:##JGPrintCopies < 46
-    JGHideCopy047 : $$Number:##JGPrintCopies < 47
-    JGHideCopy048 : $$Number:##JGPrintCopies < 48
-    JGHideCopy049 : $$Number:##JGPrintCopies < 49
-    JGHideCopy050 : $$Number:##JGPrintCopies < 50
-    JGHideCopy051 : $$Number:##JGPrintCopies < 51
-    JGHideCopy052 : $$Number:##JGPrintCopies < 52
-    JGHideCopy053 : $$Number:##JGPrintCopies < 53
-    JGHideCopy054 : $$Number:##JGPrintCopies < 54
-    JGHideCopy055 : $$Number:##JGPrintCopies < 55
-    JGHideCopy056 : $$Number:##JGPrintCopies < 56
-    JGHideCopy057 : $$Number:##JGPrintCopies < 57
-    JGHideCopy058 : $$Number:##JGPrintCopies < 58
-    JGHideCopy059 : $$Number:##JGPrintCopies < 59
-    JGHideCopy060 : $$Number:##JGPrintCopies < 60
-    JGHideCopy061 : $$Number:##JGPrintCopies < 61
-    JGHideCopy062 : $$Number:##JGPrintCopies < 62
-    JGHideCopy063 : $$Number:##JGPrintCopies < 63
-    JGHideCopy064 : $$Number:##JGPrintCopies < 64
-    JGHideCopy065 : $$Number:##JGPrintCopies < 65
-    JGHideCopy066 : $$Number:##JGPrintCopies < 66
-    JGHideCopy067 : $$Number:##JGPrintCopies < 67
-    JGHideCopy068 : $$Number:##JGPrintCopies < 68
-    JGHideCopy069 : $$Number:##JGPrintCopies < 69
-    JGHideCopy070 : $$Number:##JGPrintCopies < 70
-    JGHideCopy071 : $$Number:##JGPrintCopies < 71
-    JGHideCopy072 : $$Number:##JGPrintCopies < 72
-    JGHideCopy073 : $$Number:##JGPrintCopies < 73
-    JGHideCopy074 : $$Number:##JGPrintCopies < 74
-    JGHideCopy075 : $$Number:##JGPrintCopies < 75
-    JGHideCopy076 : $$Number:##JGPrintCopies < 76
-    JGHideCopy077 : $$Number:##JGPrintCopies < 77
-    JGHideCopy078 : $$Number:##JGPrintCopies < 78
-    JGHideCopy079 : $$Number:##JGPrintCopies < 79
-    JGHideCopy080 : $$Number:##JGPrintCopies < 80
-    JGHideCopy081 : $$Number:##JGPrintCopies < 81
-    JGHideCopy082 : $$Number:##JGPrintCopies < 82
-    JGHideCopy083 : $$Number:##JGPrintCopies < 83
-    JGHideCopy084 : $$Number:##JGPrintCopies < 84
-    JGHideCopy085 : $$Number:##JGPrintCopies < 85
-    JGHideCopy086 : $$Number:##JGPrintCopies < 86
-    JGHideCopy087 : $$Number:##JGPrintCopies < 87
-    JGHideCopy088 : $$Number:##JGPrintCopies < 88
-    JGHideCopy089 : $$Number:##JGPrintCopies < 89
-    JGHideCopy090 : $$Number:##JGPrintCopies < 90
-    JGHideCopy091 : $$Number:##JGPrintCopies < 91
-    JGHideCopy092 : $$Number:##JGPrintCopies < 92
-    JGHideCopy093 : $$Number:##JGPrintCopies < 93
-    JGHideCopy094 : $$Number:##JGPrintCopies < 94
-    JGHideCopy095 : $$Number:##JGPrintCopies < 95
-    JGHideCopy096 : $$Number:##JGPrintCopies < 96
-    JGHideCopy097 : $$Number:##JGPrintCopies < 97
-    JGHideCopy098 : $$Number:##JGPrintCopies < 98
-    JGHideCopy099 : $$Number:##JGPrintCopies < 99
-    JGHideCopy100 : $$Number:##JGPrintCopies < 100
-    JGHideCopy101 : Yes
-    JGHideCopy102 : Yes
 
 [#Form: JGLabelForm]
     Delete : Part : JGLabelPart
@@ -117,960 +20,154 @@
     Height : 297 mm
 
 [Part: JGSheetPart]
-    Parts      : JGSheetRow01, JGSheetRow02, JGSheetRow03, JGSheetRow04, JGSheetRow05, JGSheetRow06, JGSheetRow07, JGSheetRow08, JGSheetRow09, JGSheetRow10, JGSheetRow11, JGSheetRow12, JGSheetRow13, JGSheetRow14, JGSheetRow15, JGSheetRow16, JGSheetRow17, JGSheetRow18, JGSheetRow19, JGSheetRow20, JGSheetRow21, JGSheetRow22, JGSheetRow23, JGSheetRow24, JGSheetRow25, JGSheetRow26, JGSheetRow27, JGSheetRow28, JGSheetRow29, JGSheetRow30, JGSheetRow31, JGSheetRow32, JGSheetRow33, JGSheetRow34
+    Lines      : JGSheetRowLine
+    Repeat     : JGSheetRowLine : JGLabelRowColl
     Vertical   : Yes
     Space Top  : 5 mm
     Space Left : 5 mm
+    Scroll     : Vertical
 
-;; ---- Row 1 (labels 1-3) ----
-[Part: JGSheetRow01]
-    Parts        : JGSticker0101, JGSticker0102, JGSticker0103
-    Vertical     : No
-    Height       : 40 mm
+;; Row = bars line (3 fields) + exploded part holding the 4 text lines.
+;; Keeping the bars on this Line satisfies the "Line must have Fields" rule
+;; without an empty anchor line between rows.
+[Line: JGSheetRowLine]
+    Fields       : JGBars1Fld, JGBars2Fld, JGBars3Fld
+    Explode      : JGSheetRowPart
     Space Bottom : 3 mm
-    Invisible    : @@JGHideCopy001
 
-[Part: JGSticker0101]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Invisible  : @@JGHideCopy001
-
-[Part: JGSticker0102]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy002
-
-[Part: JGSticker0103]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy003
-
-;; ---- Row 2 (labels 4-6) ----
-[Part: JGSheetRow02]
-    Parts        : JGSticker0201, JGSticker0202, JGSticker0203
-    Vertical     : No
-    Height       : 40 mm
-    Space Bottom : 3 mm
-    Invisible    : @@JGHideCopy004
-
-[Part: JGSticker0201]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Invisible  : @@JGHideCopy004
-
-[Part: JGSticker0202]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy005
-
-[Part: JGSticker0203]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy006
-
-;; ---- Row 3 (labels 7-9) ----
-[Part: JGSheetRow03]
-    Parts        : JGSticker0301, JGSticker0302, JGSticker0303
-    Vertical     : No
-    Height       : 40 mm
-    Space Bottom : 3 mm
-    Invisible    : @@JGHideCopy007
-
-[Part: JGSticker0301]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Invisible  : @@JGHideCopy007
-
-[Part: JGSticker0302]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy008
-
-[Part: JGSticker0303]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy009
-
-;; ---- Row 4 (labels 10-12) ----
-[Part: JGSheetRow04]
-    Parts        : JGSticker0401, JGSticker0402, JGSticker0403
-    Vertical     : No
-    Height       : 40 mm
-    Space Bottom : 3 mm
-    Invisible    : @@JGHideCopy010
-
-[Part: JGSticker0401]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Invisible  : @@JGHideCopy010
-
-[Part: JGSticker0402]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy011
-
-[Part: JGSticker0403]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy012
-
-;; ---- Row 5 (labels 13-15) ----
-[Part: JGSheetRow05]
-    Parts        : JGSticker0501, JGSticker0502, JGSticker0503
-    Vertical     : No
-    Height       : 40 mm
-    Space Bottom : 3 mm
-    Invisible    : @@JGHideCopy013
-
-[Part: JGSticker0501]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Invisible  : @@JGHideCopy013
-
-[Part: JGSticker0502]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy014
-
-[Part: JGSticker0503]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy015
-
-;; ---- Row 6 (labels 16-18) ----
-[Part: JGSheetRow06]
-    Parts        : JGSticker0601, JGSticker0602, JGSticker0603
-    Vertical     : No
-    Height       : 40 mm
-    Space Bottom : 3 mm
-    Invisible    : @@JGHideCopy016
-
-[Part: JGSticker0601]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Invisible  : @@JGHideCopy016
-
-[Part: JGSticker0602]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy017
-
-[Part: JGSticker0603]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy018
-
-;; ---- Row 7 (labels 19-21) ----
-[Part: JGSheetRow07]
-    Parts        : JGSticker0701, JGSticker0702, JGSticker0703
-    Vertical     : No
-    Height       : 40 mm
-    Space Bottom : 3 mm
-    Invisible    : @@JGHideCopy019
-
-[Part: JGSticker0701]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Invisible  : @@JGHideCopy019
-
-[Part: JGSticker0702]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy020
-
-[Part: JGSticker0703]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy021
-
-;; ---- Row 8 (labels 22-24) ----
-[Part: JGSheetRow08]
-    Parts        : JGSticker0801, JGSticker0802, JGSticker0803
-    Vertical     : No
-    Height       : 40 mm
-    Space Bottom : 3 mm
-    Invisible    : @@JGHideCopy022
-
-[Part: JGSticker0801]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Invisible  : @@JGHideCopy022
-
-[Part: JGSticker0802]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy023
-
-[Part: JGSticker0803]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy024
-
-;; ---- Row 9 (labels 25-27) ----
-[Part: JGSheetRow09]
-    Parts        : JGSticker0901, JGSticker0902, JGSticker0903
-    Vertical     : No
-    Height       : 40 mm
-    Space Bottom : 3 mm
-    Invisible    : @@JGHideCopy025
-
-[Part: JGSticker0901]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Invisible  : @@JGHideCopy025
-
-[Part: JGSticker0902]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy026
-
-[Part: JGSticker0903]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy027
-
-;; ---- Row 10 (labels 28-30) ----
-[Part: JGSheetRow10]
-    Parts        : JGSticker1001, JGSticker1002, JGSticker1003
-    Vertical     : No
-    Height       : 40 mm
-    Space Bottom : 3 mm
-    Invisible    : @@JGHideCopy028
-
-[Part: JGSticker1001]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Invisible  : @@JGHideCopy028
-
-[Part: JGSticker1002]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy029
-
-[Part: JGSticker1003]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy030
-
-;; ---- Row 11 (labels 31-33) ----
-[Part: JGSheetRow11]
-    Parts        : JGSticker1101, JGSticker1102, JGSticker1103
-    Vertical     : No
-    Height       : 40 mm
-    Space Bottom : 3 mm
-    Invisible    : @@JGHideCopy031
-
-[Part: JGSticker1101]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Invisible  : @@JGHideCopy031
-
-[Part: JGSticker1102]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy032
-
-[Part: JGSticker1103]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy033
-
-;; ---- Row 12 (labels 34-36) ----
-[Part: JGSheetRow12]
-    Parts        : JGSticker1201, JGSticker1202, JGSticker1203
-    Vertical     : No
-    Height       : 40 mm
-    Space Bottom : 3 mm
-    Invisible    : @@JGHideCopy034
-
-[Part: JGSticker1201]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Invisible  : @@JGHideCopy034
-
-[Part: JGSticker1202]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy035
-
-[Part: JGSticker1203]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy036
-
-;; ---- Row 13 (labels 37-39) ----
-[Part: JGSheetRow13]
-    Parts        : JGSticker1301, JGSticker1302, JGSticker1303
-    Vertical     : No
-    Height       : 40 mm
-    Space Bottom : 3 mm
-    Invisible    : @@JGHideCopy037
-
-[Part: JGSticker1301]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Invisible  : @@JGHideCopy037
-
-[Part: JGSticker1302]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy038
-
-[Part: JGSticker1303]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy039
-
-;; ---- Row 14 (labels 40-42) ----
-[Part: JGSheetRow14]
-    Parts        : JGSticker1401, JGSticker1402, JGSticker1403
-    Vertical     : No
-    Height       : 40 mm
-    Space Bottom : 3 mm
-    Invisible    : @@JGHideCopy040
-
-[Part: JGSticker1401]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Invisible  : @@JGHideCopy040
-
-[Part: JGSticker1402]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy041
-
-[Part: JGSticker1403]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy042
-
-;; ---- Row 15 (labels 43-45) ----
-[Part: JGSheetRow15]
-    Parts        : JGSticker1501, JGSticker1502, JGSticker1503
-    Vertical     : No
-    Height       : 40 mm
-    Space Bottom : 3 mm
-    Invisible    : @@JGHideCopy043
-
-[Part: JGSticker1501]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Invisible  : @@JGHideCopy043
-
-[Part: JGSticker1502]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy044
-
-[Part: JGSticker1503]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy045
-
-;; ---- Row 16 (labels 46-48) ----
-[Part: JGSheetRow16]
-    Parts        : JGSticker1601, JGSticker1602, JGSticker1603
-    Vertical     : No
-    Height       : 40 mm
-    Space Bottom : 3 mm
-    Invisible    : @@JGHideCopy046
-
-[Part: JGSticker1601]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Invisible  : @@JGHideCopy046
-
-[Part: JGSticker1602]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy047
-
-[Part: JGSticker1603]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy048
-
-;; ---- Row 17 (labels 49-51) ----
-[Part: JGSheetRow17]
-    Parts        : JGSticker1701, JGSticker1702, JGSticker1703
-    Vertical     : No
-    Height       : 40 mm
-    Space Bottom : 3 mm
-    Invisible    : @@JGHideCopy049
-
-[Part: JGSticker1701]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Invisible  : @@JGHideCopy049
-
-[Part: JGSticker1702]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy050
-
-[Part: JGSticker1703]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy051
-
-;; ---- Row 18 (labels 52-54) ----
-[Part: JGSheetRow18]
-    Parts        : JGSticker1801, JGSticker1802, JGSticker1803
-    Vertical     : No
-    Height       : 40 mm
-    Space Bottom : 3 mm
-    Invisible    : @@JGHideCopy052
-
-[Part: JGSticker1801]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Invisible  : @@JGHideCopy052
-
-[Part: JGSticker1802]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy053
-
-[Part: JGSticker1803]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy054
-
-;; ---- Row 19 (labels 55-57) ----
-[Part: JGSheetRow19]
-    Parts        : JGSticker1901, JGSticker1902, JGSticker1903
-    Vertical     : No
-    Height       : 40 mm
-    Space Bottom : 3 mm
-    Invisible    : @@JGHideCopy055
-
-[Part: JGSticker1901]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Invisible  : @@JGHideCopy055
-
-[Part: JGSticker1902]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy056
-
-[Part: JGSticker1903]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy057
-
-;; ---- Row 20 (labels 58-60) ----
-[Part: JGSheetRow20]
-    Parts        : JGSticker2001, JGSticker2002, JGSticker2003
-    Vertical     : No
-    Height       : 40 mm
-    Space Bottom : 3 mm
-    Invisible    : @@JGHideCopy058
-
-[Part: JGSticker2001]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Invisible  : @@JGHideCopy058
-
-[Part: JGSticker2002]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy059
-
-[Part: JGSticker2003]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy060
-
-;; ---- Row 21 (labels 61-63) ----
-[Part: JGSheetRow21]
-    Parts        : JGSticker2101, JGSticker2102, JGSticker2103
-    Vertical     : No
-    Height       : 40 mm
-    Space Bottom : 3 mm
-    Invisible    : @@JGHideCopy061
-
-[Part: JGSticker2101]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Invisible  : @@JGHideCopy061
-
-[Part: JGSticker2102]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy062
-
-[Part: JGSticker2103]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy063
-
-;; ---- Row 22 (labels 64-66) ----
-[Part: JGSheetRow22]
-    Parts        : JGSticker2201, JGSticker2202, JGSticker2203
-    Vertical     : No
-    Height       : 40 mm
-    Space Bottom : 3 mm
-    Invisible    : @@JGHideCopy064
-
-[Part: JGSticker2201]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Invisible  : @@JGHideCopy064
-
-[Part: JGSticker2202]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy065
-
-[Part: JGSticker2203]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy066
-
-;; ---- Row 23 (labels 67-69) ----
-[Part: JGSheetRow23]
-    Parts        : JGSticker2301, JGSticker2302, JGSticker2303
-    Vertical     : No
-    Height       : 40 mm
-    Space Bottom : 3 mm
-    Invisible    : @@JGHideCopy067
+[Part: JGSheetRowPart]
+    Lines    : JGRowAliasLine, JGRowNameLine, JGRowMrpLine, JGRowRateLine
+    Vertical : Yes
 
-[Part: JGSticker2301]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Invisible  : @@JGHideCopy067
-
-[Part: JGSticker2302]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy068
-
-[Part: JGSticker2303]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy069
-
-;; ---- Row 24 (labels 70-72) ----
-[Part: JGSheetRow24]
-    Parts        : JGSticker2401, JGSticker2402, JGSticker2403
-    Vertical     : No
-    Height       : 40 mm
-    Space Bottom : 3 mm
-    Invisible    : @@JGHideCopy070
-
-[Part: JGSticker2401]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Invisible  : @@JGHideCopy070
-
-[Part: JGSticker2402]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy071
-
-[Part: JGSticker2403]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy072
-
-;; ---- Row 25 (labels 73-75) ----
-[Part: JGSheetRow25]
-    Parts        : JGSticker2501, JGSticker2502, JGSticker2503
-    Vertical     : No
-    Height       : 40 mm
-    Space Bottom : 3 mm
-    Invisible    : @@JGHideCopy073
-
-[Part: JGSticker2501]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Invisible  : @@JGHideCopy073
-
-[Part: JGSticker2502]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy074
-
-[Part: JGSticker2503]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy075
-
-;; ---- Row 26 (labels 76-78) ----
-[Part: JGSheetRow26]
-    Parts        : JGSticker2601, JGSticker2602, JGSticker2603
-    Vertical     : No
-    Height       : 40 mm
-    Space Bottom : 3 mm
-    Invisible    : @@JGHideCopy076
-
-[Part: JGSticker2601]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Invisible  : @@JGHideCopy076
-
-[Part: JGSticker2602]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy077
-
-[Part: JGSticker2603]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy078
-
-;; ---- Row 27 (labels 79-81) ----
-[Part: JGSheetRow27]
-    Parts        : JGSticker2701, JGSticker2702, JGSticker2703
-    Vertical     : No
-    Height       : 40 mm
-    Space Bottom : 3 mm
-    Invisible    : @@JGHideCopy079
+[Line: JGRowAliasLine]
+    Fields : JGAlias1Fld, JGAlias2Fld, JGAlias3Fld
 
-[Part: JGSticker2701]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Invisible  : @@JGHideCopy079
+[Line: JGRowNameLine]
+    Fields : JGName1Fld, JGName2Fld, JGName3Fld
 
-[Part: JGSticker2702]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy080
+[Line: JGRowMrpLine]
+    Fields : JGMrp1Fld, JGMrp2Fld, JGMrp3Fld
 
-[Part: JGSticker2703]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy081
+[Line: JGRowRateLine]
+    Fields : JGRate1Fld, JGRate2Fld, JGRate3Fld
 
-;; ---- Row 28 (labels 82-84) ----
-[Part: JGSheetRow28]
-    Parts        : JGSticker2801, JGSticker2802, JGSticker2803
-    Vertical     : No
-    Height       : 40 mm
-    Space Bottom : 3 mm
-    Invisible    : @@JGHideCopy082
+;; ---- Column 1 ----
 
-[Part: JGSticker2801]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Invisible  : @@JGHideCopy082
+[Field: JGBars1Fld]
+    Use    : Name Field
+    Set As : if $$IsEmpty:$A1 then "" else ("*" + $A1 + "*")
+    Style  : JGLabelBarsStyle
+    Width  : 60 mm
+    Align  : Centre
 
-[Part: JGSticker2802]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy083
+[Field: JGAlias1Fld]
+    Use    : Name Field
+    Set As : $A1
+    Style  : Tiny Bold
+    Width  : 60 mm
+    Align  : Centre
 
-[Part: JGSticker2803]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy084
+[Field: JGName1Fld]
+    Use    : Name Field
+    Set As : $$StringPart:$N1:0:24
+    Style  : Tiny
+    Width  : 60 mm
+    Align  : Centre
 
-;; ---- Row 29 (labels 85-87) ----
-[Part: JGSheetRow29]
-    Parts        : JGSticker2901, JGSticker2902, JGSticker2903
-    Vertical     : No
-    Height       : 40 mm
-    Space Bottom : 3 mm
-    Invisible    : @@JGHideCopy085
+[Field: JGMrp1Fld]
+    Use    : Name Field
+    Set As : if $$IsEmpty:$A1 then "" else ("MRP : " + $M1)
+    Style  : Tiny
+    Width  : 60 mm
+    Align  : Centre
 
-[Part: JGSticker2901]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Invisible  : @@JGHideCopy085
+[Field: JGRate1Fld]
+    Use    : Name Field
+    Set As : if $$IsEmpty:$A1 then "" else ("Rate : " + $R1)
+    Style  : Tiny
+    Width  : 60 mm
+    Align  : Centre
 
-[Part: JGSticker2902]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy086
+;; ---- Column 2 ----
 
-[Part: JGSticker2903]
-    Use        : JGLabelPart
+[Field: JGBars2Fld]
+    Use        : Name Field
+    Set As     : if $$IsEmpty:$A2 then "" else ("*" + $A2 + "*")
+    Style      : JGLabelBarsStyle
     Width      : 60 mm
-    Height     : 40 mm
+    Align      : Centre
     Space Left : 3 mm
-    Invisible  : @@JGHideCopy087
-
-;; ---- Row 30 (labels 88-90) ----
-[Part: JGSheetRow30]
-    Parts        : JGSticker3001, JGSticker3002, JGSticker3003
-    Vertical     : No
-    Height       : 40 mm
-    Space Bottom : 3 mm
-    Invisible    : @@JGHideCopy088
 
-[Part: JGSticker3001]
-    Use        : JGLabelPart
+[Field: JGAlias2Fld]
+    Use        : Name Field
+    Set As     : $A2
+    Style      : Tiny Bold
     Width      : 60 mm
-    Height     : 40 mm
-    Invisible  : @@JGHideCopy088
-
-[Part: JGSticker3002]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
+    Align      : Centre
     Space Left : 3 mm
-    Invisible  : @@JGHideCopy089
 
-[Part: JGSticker3003]
-    Use        : JGLabelPart
+[Field: JGName2Fld]
+    Use        : Name Field
+    Set As     : $$StringPart:$N2:0:24
+    Style      : Tiny
     Width      : 60 mm
-    Height     : 40 mm
+    Align      : Centre
     Space Left : 3 mm
-    Invisible  : @@JGHideCopy090
-
-;; ---- Row 31 (labels 91-93) ----
-[Part: JGSheetRow31]
-    Parts        : JGSticker3101, JGSticker3102, JGSticker3103
-    Vertical     : No
-    Height       : 40 mm
-    Space Bottom : 3 mm
-    Invisible    : @@JGHideCopy091
-
-[Part: JGSticker3101]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Invisible  : @@JGHideCopy091
 
-[Part: JGSticker3102]
-    Use        : JGLabelPart
+[Field: JGMrp2Fld]
+    Use        : Name Field
+    Set As     : if $$IsEmpty:$A2 then "" else ("MRP : " + $M2)
+    Style      : Tiny
     Width      : 60 mm
-    Height     : 40 mm
+    Align      : Centre
     Space Left : 3 mm
-    Invisible  : @@JGHideCopy092
 
-[Part: JGSticker3103]
-    Use        : JGLabelPart
+[Field: JGRate2Fld]
+    Use        : Name Field
+    Set As     : if $$IsEmpty:$A2 then "" else ("Rate : " + $R2)
+    Style      : Tiny
     Width      : 60 mm
-    Height     : 40 mm
+    Align      : Centre
     Space Left : 3 mm
-    Invisible  : @@JGHideCopy093
-
-;; ---- Row 32 (labels 94-96) ----
-[Part: JGSheetRow32]
-    Parts        : JGSticker3201, JGSticker3202, JGSticker3203
-    Vertical     : No
-    Height       : 40 mm
-    Space Bottom : 3 mm
-    Invisible    : @@JGHideCopy094
-
-[Part: JGSticker3201]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Invisible  : @@JGHideCopy094
 
-[Part: JGSticker3202]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Space Left : 3 mm
-    Invisible  : @@JGHideCopy095
+;; ---- Column 3 ----
 
-[Part: JGSticker3203]
-    Use        : JGLabelPart
+[Field: JGBars3Fld]
+    Use        : Name Field
+    Set As     : if $$IsEmpty:$A3 then "" else ("*" + $A3 + "*")
+    Style      : JGLabelBarsStyle
     Width      : 60 mm
-    Height     : 40 mm
+    Align      : Centre
     Space Left : 3 mm
-    Invisible  : @@JGHideCopy096
-
-;; ---- Row 33 (labels 97-99) ----
-[Part: JGSheetRow33]
-    Parts        : JGSticker3301, JGSticker3302, JGSticker3303
-    Vertical     : No
-    Height       : 40 mm
-    Space Bottom : 3 mm
-    Invisible    : @@JGHideCopy097
-
-[Part: JGSticker3301]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
-    Invisible  : @@JGHideCopy097
 
-[Part: JGSticker3302]
-    Use        : JGLabelPart
+[Field: JGAlias3Fld]
+    Use        : Name Field
+    Set As     : $A3
+    Style      : Tiny Bold
     Width      : 60 mm
-    Height     : 40 mm
+    Align      : Centre
     Space Left : 3 mm
-    Invisible  : @@JGHideCopy098
 
-[Part: JGSticker3303]
-    Use        : JGLabelPart
+[Field: JGName3Fld]
+    Use        : Name Field
+    Set As     : $$StringPart:$N3:0:24
+    Style      : Tiny
     Width      : 60 mm
-    Height     : 40 mm
+    Align      : Centre
     Space Left : 3 mm
-    Invisible  : @@JGHideCopy099
-
-;; ---- Row 34 (labels 100-102) ----
-[Part: JGSheetRow34]
-    Parts        : JGSticker3401, JGSticker3402, JGSticker3403
-    Vertical     : No
-    Height       : 40 mm
-    Space Bottom : 3 mm
-    Invisible    : @@JGHideCopy100
 
-[Part: JGSticker3401]
-    Use        : JGLabelPart
+[Field: JGMrp3Fld]
+    Use        : Name Field
+    Set As     : if $$IsEmpty:$A3 then "" else ("MRP : " + $M3)
+    Style      : Tiny
     Width      : 60 mm
-    Height     : 40 mm
-    Invisible  : @@JGHideCopy100
-
-[Part: JGSticker3402]
-    Use        : JGLabelPart
-    Width      : 60 mm
-    Height     : 40 mm
+    Align      : Centre
     Space Left : 3 mm
-    Invisible  : @@JGHideCopy101
 
-[Part: JGSticker3403]
-    Use        : JGLabelPart
+[Field: JGRate3Fld]
+    Use        : Name Field
+    Set As     : if $$IsEmpty:$A3 then "" else ("Rate : " + $R3)
+    Style      : Tiny
     Width      : 60 mm
-    Height     : 40 mm
+    Align      : Centre
     Space Left : 3 mm
-    Invisible  : @@JGHideCopy102
-

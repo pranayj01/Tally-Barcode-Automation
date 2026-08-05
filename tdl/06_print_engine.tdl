@@ -1,15 +1,20 @@
 ;; ============================================================================
-;; 06_print_engine.tdl — Stock Item reprint launcher (no popup)
+;; 06_print_engine.tdl — Label queue + Stock Item reprint launcher
 ;;
-;; Workflow A — Single item reprint:
-;;   Edit "Labels to Print" on Stock Item master (Create/Alter + Storage)
-;;   Ctrl+Alt+B → read that UDF → Print Report : JGLabelReport
+;; Architecture (both workflows):
+;;   1. Clear JGLabelQueue
+;;   2. Enqueue one compound element per physical label
+;;   3. Pack into JGLabelRows (3 labels per row)
+;;   4. Print Report : JGLabelReport   ← exactly once
 ;;
-;; No Display config Report. No copies popup.
-;; Layout still driven by ##JGPrintCopies (Module 08).
+;; Module 08 repeats over JGLabelRowColl. Never call Print Report
+;; inside an inventory-entry loop.
 ;;
-;; Purchase qty printing lives in 04_purchase.tdl (calls JGLoadItemPrintPayload
-;; and Print Report : JGLabelReport).
+;; Workflow A — Stock Item reprint:
+;;   Labels to Print UDF → enqueue that many copies of the current item
+;;
+;; Workflow B/C — Purchase (04_purchase.tdl):
+;;   Each inventory line enqueued $BilledQty times
 ;; ============================================================================
 
 [System: Variable]
@@ -18,6 +23,8 @@
     JGPrintMRP        : String
     JGPrintRate       : String
     JGPrintCopies     : Number
+    List Variable     : JGLabelQueue
+    List Variable     : JGLabelRows
 
 [Variable: JGPrintAlias]
     Type    : String
@@ -38,6 +45,36 @@
 [Variable: JGPrintCopies]
     Type    : Number
     Default : 1
+
+;; One physical sticker in the flat queue
+[Variable: JGLabelQueue]
+    Variable : Alias    : String
+    Variable : ItemName : String
+    Variable : MRP      : String
+    Variable : Rate     : String
+
+;; One A4 row = up to 3 stickers (packed from JGLabelQueue)
+[Variable: JGLabelRows]
+    Variable : A1    : String
+    Variable : N1    : String
+    Variable : M1    : String
+    Variable : R1    : String
+    Variable : A2    : String
+    Variable : N2    : String
+    Variable : M2    : String
+    Variable : R2    : String
+    Variable : A3    : String
+    Variable : N3    : String
+    Variable : M3    : String
+    Variable : R3    : String
+    Variable : Show2 : Logical
+    Variable : Show3 : Logical
+
+[Collection: JGLabelPrintColl]
+    Data Source : Variable : JGLabelQueue
+
+[Collection: JGLabelRowColl]
+    Data Source : Variable : JGLabelRows
 
 ;; ---- Stock Item master: Labels to Print (manual override) ----
 
@@ -70,7 +107,7 @@
     Key    : Ctrl + Alt + B
     Action : Call : JGPrintBarcodeStart
 
-;; ---- Shared payload loader (Stock Item reprint + Purchase) ----
+;; ---- Queue helpers ----
 
 [Function: JGClampPrintCopies]
     Parameter : pCopies : Number
@@ -85,9 +122,117 @@
     08 : Set : JGPrintCopies : ##N
     09 : RETURN : ##N
 
+[Function: JGClearLabelQueue]
+    01 : LIST DELETE EX : JGLabelQueue
+    02 : LIST DELETE EX : JGLabelRows
+    03 : Set : JGPrintCopies : 0
+    04 : RETURN : Yes
+
+[Function: JGEnqueueOneLabel]
+    ;; Append one sticker to the flat queue. No printing.
+    Parameter : pAlias : String
+    Parameter : pName  : String
+    Parameter : pMrp   : String
+    Parameter : pRate  : String
+    Variable  : Idx    : Number
+    01 : IF : $$IsEmpty:##pAlias
+    02 :   RETURN : No
+    03 : ENDIF
+    04 : LIST ADD EX : JGLabelQueue
+    05 : Set : Idx : $$ListCount:JGLabelQueue
+    06 : MULTI SET : JGLabelQueue[##Idx] : Alias : ##pAlias, ItemName : ##pName, MRP : ##pMrp, Rate : ##pRate
+    07 : RETURN : Yes
+
+[Function: JGEnqueueItemLabels]
+    ;; Resolve Stock Item → enqueue pCopies stickers. No printing.
+    Parameter : pItem   : String
+    Parameter : pCopies : Number
+    Variable  : Code    : String
+    Variable  : Mrp     : String
+    Variable  : Rate    : String
+    Variable  : N       : Number
+    Variable  : C       : Number
+    01 : IF : $$IsEmpty:##pItem
+    02 :   RETURN : No
+    03 : ENDIF
+    04 : Set : Code : ""
+    05 : Set : Mrp  : ""
+    06 : Set : Rate : ""
+    07 : Set : JGAliasItemName : ##pItem
+    08 : Walk Collection : JGStockItemByNameColl
+    09 :   Set : Code : $$Alias
+    10 :   Set : Mrp  : $$String:$MRPDetails[Last].MRPRateDetails[Last].MRPRate
+    11 :   Set : Rate : $$String:$StandardPrice
+    12 : End Walk
+    13 : IF : $$IsEmpty:##Code
+    14 :   Set : Code : $$String:$FirstAlias:StockItem:##pItem
+    15 : ENDIF
+    16 : IF : $$IsEmpty:##Rate
+    17 :   Set : Rate : $$String:$StandardPrice:StockItem:##pItem
+    18 : ENDIF
+    19 : IF : $$IsEmpty:##Code
+    20 :   RETURN : No
+    21 : ENDIF
+    22 : Call : JGClampPrintCopies : ##pCopies
+    23 : Set : N : $$LastResult
+    24 : Set : JGPrintAlias    : ##Code
+    25 : Set : JGPrintItemName : ##pItem
+    26 : Set : JGPrintMRP      : ##Mrp
+    27 : Set : JGPrintRate     : ##Rate
+    28 : Set : C : 1
+    29 : WHILE : ##C <= ##N
+    30 :   Call : JGEnqueueOneLabel : ##Code : ##pItem : ##Mrp : ##Rate
+    31 :   Set : C : ##C + 1
+    32 : END WHILE
+    33 : RETURN : Yes
+
+[Function: JGPackLabelRows]
+    ;; Flat queue → rows of 3 for the A4 sheet. No printing.
+    Variable : Total : Number
+    Variable : I     : Number
+    Variable : I2    : Number
+    Variable : I3    : Number
+    Variable : Row   : Number
+    Variable : Left  : Number
+    01 : LIST DELETE EX : JGLabelRows
+    02 : Set : Total : $$ListCount:JGLabelQueue
+    03 : IF : ##Total < 1
+    04 :   RETURN : No
+    05 : ENDIF
+    06 : Set : I : 1
+    07 : WHILE : ##I <= ##Total
+    08 :   LIST ADD EX : JGLabelRows
+    09 :   Set : Row  : $$ListCount:JGLabelRows
+    10 :   Set : Left : ##Total - ##I + 1
+    11 :   MULTI SET : JGLabelRows[##Row] : A1 : ##JGLabelQueue[##I].Alias, N1 : ##JGLabelQueue[##I].ItemName, M1 : ##JGLabelQueue[##I].MRP, R1 : ##JGLabelQueue[##I].Rate, Show2 : No, Show3 : No, A2 : "", N2 : "", M2 : "", R2 : "", A3 : "", N3 : "", M3 : "", R3 : ""
+    12 :   IF : ##Left >= 2
+    13 :     Set : I2 : ##I + 1
+    14 :     MULTI SET : JGLabelRows[##Row] : A2 : ##JGLabelQueue[##I2].Alias, N2 : ##JGLabelQueue[##I2].ItemName, M2 : ##JGLabelQueue[##I2].MRP, R2 : ##JGLabelQueue[##I2].Rate, Show2 : Yes
+    15 :   ENDIF
+    16 :   IF : ##Left >= 3
+    17 :     Set : I3 : ##I + 2
+    18 :     MULTI SET : JGLabelRows[##Row] : A3 : ##JGLabelQueue[##I3].Alias, N3 : ##JGLabelQueue[##I3].ItemName, M3 : ##JGLabelQueue[##I3].MRP, R3 : ##JGLabelQueue[##I3].Rate, Show3 : Yes
+    19 :   ENDIF
+    20 :   Set : I : ##I + 3
+    21 : END WHILE
+    22 : Set : JGPrintCopies : ##Total
+    23 : RETURN : Yes
+
+[Function: JGPrintLabelQueue]
+    ;; Pack rows then ONE Print Report for the whole voucher/item.
+    01 : IF : $$ListCount:JGLabelQueue < 1
+    02 :   RETURN : No
+    03 : ENDIF
+    04 : Call : JGPackLabelRows
+    05 : IF : NOT $$LastResult
+    06 :   RETURN : No
+    07 : ENDIF
+    08 : Print Report : JGLabelReport
+    09 : RETURN : Yes
+
+;; Kept for callers that still resolve a single item into ##JGPrint*
+;; variables; purchase/stock print paths use the queue instead.
 [Function: JGLoadItemPrintPayload]
-    ;; Load one Stock Item into print variables. pCopies = label count for Module 08.
-    ;; Alias via JGPurcGetAlias (04) — Walk Collection + $$Alias (live-verified).
     Parameter : pItem : String
     Parameter : pCopies : Number
     Variable  : Code : String
@@ -96,22 +241,33 @@
     01 : IF : $$IsEmpty:##pItem
     02 :   RETURN : No
     03 : ENDIF
-    04 : Call : JGPurcGetAlias : ##pItem
-    05 : Set : Code : $$LastResult
-    06 : IF : $$IsEmpty:##Code
-    07 :   RETURN : No
-    08 : ENDIF
-    09 : Set : Mrp  : $$String:$MRPDetails[Last].MRPRateDetails[Last].MRPRate:StockItem:##pItem
-    10 : Set : Rate : $$String:$StandardPrice:StockItem:##pItem
-    11 : Set : JGPrintAlias    : ##Code
-    12 : Set : JGPrintItemName : ##pItem
-    13 : Set : JGPrintMRP      : ##Mrp
-    14 : Set : JGPrintRate     : ##Rate
-    15 : Call : JGClampPrintCopies : ##pCopies
-    16 : RETURN : Yes
+    04 : Set : Code : ""
+    05 : Set : Mrp  : ""
+    06 : Set : Rate : ""
+    07 : Set : JGAliasItemName : ##pItem
+    08 : Walk Collection : JGStockItemByNameColl
+    09 :   Set : Code : $$Alias
+    10 :   Set : Mrp  : $$String:$MRPDetails[Last].MRPRateDetails[Last].MRPRate
+    11 :   Set : Rate : $$String:$StandardPrice
+    12 : End Walk
+    13 : IF : $$IsEmpty:##Code
+    14 :   Set : Code : $$String:$FirstAlias:StockItem:##pItem
+    15 : ENDIF
+    16 : IF : $$IsEmpty:##Rate
+    17 :   Set : Rate : $$String:$StandardPrice:StockItem:##pItem
+    18 : ENDIF
+    19 : IF : $$IsEmpty:##Code
+    20 :   RETURN : No
+    21 : ENDIF
+    22 : Set : JGPrintAlias    : ##Code
+    23 : Set : JGPrintItemName : ##pItem
+    24 : Set : JGPrintMRP      : ##Mrp
+    25 : Set : JGPrintRate     : ##Rate
+    26 : Call : JGClampPrintCopies : ##pCopies
+    27 : RETURN : Yes
 
 [Function: JGPrintBarcodeStart]
-    ;; Stock Item master reprint — copies from UDF JGLabelsToPrint
+    ;; Stock Item master reprint — enqueue LabelsToPrint copies, print once.
     Variable : Code   : String
     Variable : Item   : String
     Variable : Copies : Number
@@ -129,9 +285,15 @@
     10 : ENDIF
     11 : Set : Mrp  : $$String:$MRPDetails[Last].MRPRateDetails[Last].MRPRate
     12 : Set : Rate : $$String:$StandardPrice
-    13 : Set : JGPrintAlias    : ##Code
-    14 : Set : JGPrintItemName : ##Item
-    15 : Set : JGPrintMRP      : ##Mrp
-    16 : Set : JGPrintRate     : ##Rate
-    17 : Call : JGClampPrintCopies : ##Copies
-    18 : Print Report : JGLabelReport
+    13 : Call : JGClearLabelQueue
+    14 : Call : JGClampPrintCopies : ##Copies
+    15 : Set : Copies : $$LastResult
+    16 : Set : JGPrintAlias    : ##Code
+    17 : Set : JGPrintItemName : ##Item
+    18 : Set : JGPrintMRP      : ##Mrp
+    19 : Set : JGPrintRate     : ##Rate
+    20 : WHILE : ##Copies > 0
+    21 :   Call : JGEnqueueOneLabel : ##Code : ##Item : ##Mrp : ##Rate
+    22 :   Set : Copies : ##Copies - 1
+    23 : END WHILE
+    24 : Call : JGPrintLabelQueue

@@ -1,27 +1,27 @@
 ;; ============================================================================
-;; 04_purchase.tdl — Purchase → Alias + optional label print
+;; 04_purchase.tdl — Purchase → Alias + on-demand label print
 ;;
 ;; On Purchase Form Accept:
-;;   1. Walk Inventory Entries — ensure Alias (never overwrite)
-;;   2. Query Box: Print Barcode Labels?
-;;   3. If Yes: for each inventory line, Print Report : JGLabelReport
-;;      with ##JGPrintCopies = BilledQty (one label per unit received)
+;;   Walk Inventory Entries — ensure Alias (never overwrite). No printing,
+;;   no prompt: saving a voucher must never interrupt the user.
 ;;
-;; Label layout remains Modules 07/08 (fixed 3-col A4).
-;; Stock Item master "Labels to Print" is for reprint only (Module 06).
+;; Printing is always explicit — Ctrl+Alt+B on the voucher (create or alter).
+;;
+;; Print pipeline (NO Print Report inside the item loop):
+;;   1. Clear JGLabelQueue
+;;   2. Walk Inventory Entries — enqueue each item $BilledQty times
+;;   3. Pack rows + Print Report : JGLabelReport   ← exactly once
+;;
+;; Never JGLabelsToPrint, never a quantity prompt.
+;; Label layout remains Modules 07/08 (3-col A4 over the queue).
 ;; ============================================================================
 
 [System: Variable]
     JGAliasItemName      : String
-    JGPrintLabelsChoice  : Logical
 
 [Variable: JGAliasItemName]
     Type    : String
     Default : ""
-
-[Variable: JGPrintLabelsChoice]
-    Type    : Logical
-    Default : No
 
 [Collection: JGStockItemByNameColl]
     Type   : Stock Item
@@ -91,22 +91,50 @@
     14 : Accept Alter
 
 [Function: JGPurcPrintLabelsFromQty]
-    ;; One Print Report per inventory line; copies = BilledQty (clamped in 06).
+    ;; Build the entire voucher label queue first, then print once.
+    ;; Print Report is NEVER called inside the Inventory Entries walk.
     Variable : ItemName : String
     Variable : Qty      : Number
-    01 : Walk Collection : Inventory Entries
-    02 :   Set : ItemName : $StockItemName
-    03 :   IF : NOT $$IsEmpty:##ItemName
-    04 :     Set : Qty : $$Number:$BilledQty
-    05 :     IF : ##Qty < 1
-    06 :       Set : Qty : 1
-    07 :     ENDIF
-    08 :     Call : JGLoadItemPrintPayload : ##ItemName : ##Qty
-    09 :     IF : $$LastResult
-    10 :       Print Report : JGLabelReport
+    Variable : Lines    : Number
+    Variable : Queued   : Number
+    01 : Call : JGClearLabelQueue
+    02 : Set : Lines  : 0
+    03 : Set : Queued : 0
+    04 : Walk Collection : Inventory Entries
+    05 :   Set : ItemName : $StockItemName
+    06 :   IF : NOT $$IsEmpty:##ItemName
+    07 :     Set : Lines : ##Lines + 1
+    08 :     Set : Qty : $$Number:$BilledQty
+    09 :     IF : ##Qty < 1
+    10 :       Set : Qty : 1
     11 :     ENDIF
-    12 :   ENDIF
-    13 : End Walk
+    12 :     Call : JGEnqueueItemLabels : ##ItemName : ##Qty
+    13 :     IF : $$LastResult
+    14 :       Set : Queued : ##Queued + 1
+    15 :     ENDIF
+    16 :   ENDIF
+    17 : End Walk
+    18 : IF : ##Lines < 1
+    19 :   MSG BOX : "Print Barcode Labels" : "No inventory entries found in this voucher."
+    20 :   RETURN : No
+    21 : ENDIF
+    22 : IF : ##Queued < 1 OR $$ListCount:JGLabelQueue < 1
+    23 :   MSG BOX : "Print Barcode Labels" : "No item in this voucher has a barcode alias yet."
+    24 :   RETURN : No
+    25 : ENDIF
+    26 : Call : JGPrintLabelQueue
+    27 : RETURN : $$LastResult
+
+[Function: JGPurcPrintLabelsButton]
+    ;; Workflow 3 — saved Purchase Voucher opened in Alter/Display.
+    01 : IF : NOT $$IsPurchase:$VoucherTypeName
+    02 :   IF : NOT $$IsEqual:$VoucherTypeName:"Purchase"
+    03 :     MSG BOX : "Print Barcode Labels" : "This voucher is not a Purchase voucher."
+    04 :     RETURN : No
+    05 :   ENDIF
+    06 : ENDIF
+    07 : Call : JGPurcPrintLabelsFromQty
+    08 : RETURN : $$LastResult
 
 [Function: JGPurcOnAccept]
     Variable : ItemName : String
@@ -121,12 +149,13 @@
     09 :     Call : JGPurcSetAliasIfEmpty : ##ItemName
     10 :   ENDIF
     11 : End Walk
-    12 : Set : JGPrintLabelsChoice : No
-    13 : Query Box : "Print Barcode Labels?" : JGPrintLabelsChoice
-    14 : IF : ##JGPrintLabelsChoice
-    15 :   Call : JGPurcPrintLabelsFromQty
-    16 : ENDIF
-    17 : RETURN : Yes
+    12 : RETURN : Yes
 
 [#Form: Voucher]
-    On : Form Accept : Yes : Call : JGPurcOnAccept
+    On      : Form Accept : Yes : Call : JGPurcOnAccept
+    Add     : Buttons : JGPurcPrintLabelsBtn
+
+[Button: JGPurcPrintLabelsBtn]
+    Title  : "Print Barcode Labels"
+    Key    : Ctrl + Alt + B
+    Action : Call : JGPurcPrintLabelsButton

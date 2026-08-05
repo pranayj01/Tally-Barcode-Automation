@@ -1,14 +1,20 @@
 ;; ============================================================================
-;; 07_label_report.tdl — ONE complete sticker
+;; 07_label_report.tdl — ONE complete sticker (column template)
 ;;
-;; Content: barcode bars, item name, MRP, rate
-;; (Alias text under bars so the code is readable / scannable as Code39)
+;; Content comes from the current JGLabelRows object methods
+;; (A1/N1/M1/R1 …) when used as a sheet column, or from the flat
+;; queue object ($Alias / $ItemName / $MRP / $Rate) when repeated
+;; directly. Module 08 owns the A4 sheet + Repeat.
 ;; ============================================================================
 
 [Style: JGLabelBarsStyle]
     Font   : "Libre Barcode 39"
     Height : 28
 
+;; No Collection attribute here. A Report bound to a collection is generated
+;; once per object in it, so the whole sheet repeated once per row (4 labels =
+;; 2 rows = 2 pages, 50 labels = 17 rows = 34 pages). The rows are consumed by
+;; the Repeat on JGSheetPart in Module 08 instead.
 [Report: JGLabelReport]
     Title : "Barcode Label"
     Form  : JGLabelForm
