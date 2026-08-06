@@ -37,7 +37,7 @@
     Lines      : JGSheetRowLine
     Repeat     : JGSheetRowLine : JGLabelRowColl
     Vertical   : Yes
-    Space Top  : 4 mm
+    Space Top  : -1 mm
     Space Left : 3.5 mm
     Scroll     : Vertical
 
@@ -49,7 +49,7 @@
 [Line: JGSheetRowLine]
     Fields       : JGSheetRowAnchorFld
     Explode      : JGStickerPart
-    Space Bottom : 1.5 mm
+    Space Bottom : 1.65 mm
 
 [Field: JGSheetRowAnchorFld]
     Use    : Name Field
@@ -64,7 +64,7 @@
 [Part: JGStickerPart]
     Lines    : JGStickerBarsLine, JGStickerAliasLine, JGStickerNameLine, JGStickerMrpLine, JGStickerRateLine
     Vertical : Yes
-    Height   : 27.5 mm
+    Height   : 26.5 mm
     Space Top : 0 mm
 
 [Line: JGStickerBarsLine]
