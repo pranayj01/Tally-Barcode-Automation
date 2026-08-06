@@ -250,3 +250,94 @@ Report-level `Collection` was removed.
 page count pending retest  
 
 **Result:** PENDING
+
+---
+
+## Stock Item create — Alias auto-generation restored
+
+**Date:** 2026-08-06  
+**Files Changed:** `tdl/06_print_engine.tdl`  
+**Reason:** Creating a Stock Item with an empty Alias no longer wrote a
+zero-padded code (`000000456`). Alias assignment lived only on Purchase
+Form Accept (`JGPurcSetAliasIfEmpty`); the Stock Item master had no
+equivalent.
+
+**Fix:** `On : Form Accept` on `[#Form: Stock Item]` calls
+`JGSIEnsureAliasOnAccept`. If `$$Alias` is empty it issues the next code via
+`JGPurcNextCode` (same 7-digit padded sequence Purchase uses) and attaches it
+with `Insert Collection Object : Name` on the current object. A user-typed
+Alias is never overwritten.
+
+**Follow-up (still broken after first fix):** Root cause was call order.
+`JGPurcNextCode` does `New Object : Company` + `Accept Alter`, which switches
+object context away from the Stock Item form *before* Alias was inserted, so
+steps 13–14 wrote nowhere useful. Rewrite: read `JGNextSeq` remotely, insert
+Alias on the current Stock Item first, then bump the company counter.
+
+**Follow-up 2 — sequence gaps 14–16, Alias still blank on Gateway Create:**
+User confirmed Purchase-path create+print works; Gateway → Stock Item → Create
+left Alias empty but `JGNextSeq` advanced (0000013 then 0000017). Cause:
+`On : Form Accept : Call only` overrides default accept (manual p.535) and the
+handler bumped Company **before** the master was saved — counter consumed,
+Alias never persisted.
+
+**Fix:** Official two-line hook:
+`On : Form Accept : Yes : Form Accept` then
+`On : Form Accept : Yes : Call : JGSIEnsureAliasOnAccept`.
+Handler now delegates to `JGPurcSetAliasIfEmpty` (same `New Object : Stock Item`
+path that works on Purchase save). Gaps 14–16 are spent numbers and will not
+be reused (by design).
+
+**Tests Performed:** Pending user retest  
+
+**Result:** PENDING
+
+---
+
+## Label size hardcoded to 66.5 × 27.5 mm — 3×10 = 30 / A4
+
+**Date:** 2026-08-06  
+**Files Changed:** `tdl/08_templates.tdl`, `tdl/07_label_report.tdl`  
+**Reason:** Physical sticker sheet is 66.5 × 27.5 mm, **3 columns × 10 rows
+= 30 labels per A4 page** (not 3×8).
+
+**Fit math:** 10 × 27.5 mm = 275 mm of label height → only 22 mm left on A4
+for margins. Row `Height : 27.5 mm`, `Space Bottom : 0`, `Space Top : 11 mm`.
+Widths 66.5 mm, column gutters 2.5 mm, left margin 5 mm. Barcode font height 12
+so bars+text fit inside 27.5 mm. No config UI.
+
+**Follow-up — parameterized only (layout logic unchanged):** dimensions moved to
+`[System: Formula]` (`JGPageWidth/Height`, `JGLabelWidth/Height`,
+`JGLeftMargin`, `JGTopMargin`, `JGGapX/Y`, `JGCols`, `JGRows`). Form/Part/Field
+attributes use `@@… mm`. Physical sheet: margins 3.5/4 mm, gaps 1.5 mm,
+3×10. If `JGGapY` overflows the last row, set it to 0.
+
+**Follow-up — barcode/text white gap:** Bars lived on `JGSheetRowLine` while
+Alias/Name/MRP/Rate were in an `Explode`d Part that also had `Height : 27.5 mm`,
+so Tally reserved a full second cell and left a blank band. Bars moved into
+`JGSheetRowPart` as `JGRowBarsLine` (first line); row Line keeps a zero-width
+anchor + Explode only; Part Height removed. `JGLabelBarsStyle` Height set to 16
+in `07_label_report.tdl`.
+
+**Follow-up — labels too far apart:** Preview showed ~25 mm left margin and
+~45 mm row pitch (not 3.5 / 29 mm). Cause: `Width : @@JGLabelWidth mm` was
+ignored by Tally. Formulas now return full strings (`"66.5 mm"`) and attributes
+use `Width : @@JGLabelWidth` with no trailing unit. Part Height restored to
+label height; barcode style Height 12. Sheet: 3.5+66.5+1.5+66.5+1.5+66.5+3.5
+= 210; 4+10×27.5+9×1.5+4 = 297.
+
+**Date:** 2026-08-06  
+**Files Changed:** `tdl/04_purchase.tdl`  
+**Reason:** For packed goods (1 BOX = 6 PC, voucher 60 PC = 10 BOX), labels
+must be one per inner pack, not one per piece.
+
+**Fix:** `JGPurcLabelCountFromLine` uses `$$String:$BilledQty:Secondary`
+(Tally FAQ 6201 — qty in alternate units). Falls back to primary
+`$$Number:$BilledQty` when the item has no alternate unit.
+Stock Item "Labels to Print" / Ctrl+Alt+B unchanged.
+
+**Date:** 2026-08-06  
+**Files Changed:** `tdl/04_purchase.tdl`, `tdl/06_print_engine.tdl`  
+**Reason:** User confirmed label Rate must be Stock Item selling price
+(`$StandardPrice`), not Purchase voucher buying Rate. Temporary override
+reverted; behaviour restored to pre-change.

@@ -10,7 +10,11 @@
 ;; Module 08 repeats over JGLabelRowColl. Never call Print Report
 ;; inside an inventory-entry loop.
 ;;
-;; Workflow A — Stock Item reprint:
+;; Workflow A — Stock Item create / alter:
+;;   Form Accept (save) THEN JGPurcSetAliasIfEmpty — same path Purchase uses.
+;;   Never bump JGNextSeq on the unsaved form object (that leaked 14–16).
+;;
+;; Workflow A2 — Stock Item reprint:
 ;;   Labels to Print UDF → enqueue that many copies of the current item
 ;;
 ;; Workflow B/C — Purchase (04_purchase.tdl):
@@ -101,11 +105,29 @@
 [#Form: Stock Item]
     Add : Part    : JG SI Labels To Print Part
     Add : Buttons : JGPrintBarcodeBtn
+    ;; Manual p.535: On Form Accept overrides the default accept — Form Accept
+    ;; must be explicit. Save the master first, then assign Alias on the saved
+    ;; object (same New Object path as Purchase). Order matters.
+    On  : Form Accept : Yes : Form Accept
+    On  : Form Accept : Yes : Call : JGSIEnsureAliasOnAccept
 
 [Button: JGPrintBarcodeBtn]
     Title  : "Print Barcode"
     Key    : Ctrl + Alt + B
     Action : Call : JGPrintBarcodeStart
+
+;; ---- Stock Item create/alter: auto Alias if blank ----
+
+[Function: JGSIEnsureAliasOnAccept]
+    ;; Runs AFTER Form Accept — item is on disk. Delegates to JGPurcSetAliasIfEmpty
+    ;; (04_purchase.tdl): New Object : Stock Item → Insert Name → Accept Alter.
+    Variable : Item : String
+    01 : Set : Item : $Name
+    02 : IF : $$IsEmpty:##Item
+    03 :   RETURN : Yes
+    04 : ENDIF
+    05 : Call : JGPurcSetAliasIfEmpty : ##Item
+    06 : RETURN : Yes
 
 ;; ---- Queue helpers ----
 

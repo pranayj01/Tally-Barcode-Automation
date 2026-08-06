@@ -1,17 +1,27 @@
 ;; ============================================================================
-;; 08_templates.tdl — A4 3-column sheet repeating over JGLabelRowColl
+;; 08_templates.tdl — A4 barcode sheet layout (clean rewrite)
 ;;
-;; JGPrintLabelQueue packs JGLabelQueue into rows of 3 (JGLabelRows).
-;; This Form deletes the single-sticker Part and repeats one row Line
-;; per packed row — one preview / one print job for the whole voucher.
+;; Compatible with print engine (unchanged):
+;;   Collection : JGLabelRowColl
+;;   Methods    : $A1..$A3 $N1..$N3 $M1..$M3 $R1..$R3
+;;   Report     : JGLabelReport / Form JGLabelForm
 ;;
-;; LAYOUT RULE: the three stickers of a row are FIELDS on the same Line.
-;; Sub-Parts with "Vertical : No" rendered one below the other, so each
-;; sticker text row is a Line carrying three 60 mm fields instead.
+;; Physical sheet (hardcoded mm — no @@ formulas):
+;;   A4 210×297 | margins L/R 3.5 Top/Bottom 4
+;;   Label 66.5×27.5 | gap X/Y 1.5 | grid 3×10 = 30/page
+;;   Width : 3.5+66.5+1.5+66.5+1.5+66.5+3.5 = 210
+;;   Height: 4+10×27.5+9×1.5+4 = 297
 ;;
-;; Unused slots in the last row are blanked by their own Set As
-;; (no "**" bars, no bare "MRP :" / "Rate :" labels).
+;; Hierarchy (one Explode only):
+;;   Form → Sheet Part (Repeat rows)
+;;        → Row Line (anchor + Explode + vertical gap)
+;;        → Sticker Part Height 27.5 mm (Bars→Alias→Name→MRP→Rate)
+;;   Height lives ONLY on the sticker Part so the row cannot double-expand.
 ;; ============================================================================
+
+;; --------------------------------------------------------------------------
+;; Form — full A4 page
+;; --------------------------------------------------------------------------
 
 [#Form: JGLabelForm]
     Delete : Part : JGLabelPart
@@ -19,155 +29,182 @@
     Width  : 210 mm
     Height : 297 mm
 
+;; --------------------------------------------------------------------------
+;; Sheet — repeats one physical row per JGLabelRowColl object
+;; --------------------------------------------------------------------------
+
 [Part: JGSheetPart]
     Lines      : JGSheetRowLine
     Repeat     : JGSheetRowLine : JGLabelRowColl
     Vertical   : Yes
-    Space Top  : 5 mm
-    Space Left : 5 mm
+    Space Top  : 4 mm
+    Space Left : 3.5 mm
     Scroll     : Vertical
 
-;; Row = bars line (3 fields) + exploded part holding the 4 text lines.
-;; Keeping the bars on this Line satisfies the "Line must have Fields" rule
-;; without an empty anchor line between rows.
+;; --------------------------------------------------------------------------
+;; Row — one line of 3 stickers
+;;   No Height here. Pitch = exploded Part (27.5) + Space Bottom (1.5).
+;; --------------------------------------------------------------------------
+
 [Line: JGSheetRowLine]
-    Fields       : JGBars1Fld, JGBars2Fld, JGBars3Fld
-    Explode      : JGSheetRowPart
-    Space Bottom : 3 mm
+    Fields       : JGSheetRowAnchorFld
+    Explode      : JGStickerPart
+    Space Bottom : 1.5 mm
 
-[Part: JGSheetRowPart]
-    Lines    : JGRowAliasLine, JGRowNameLine, JGRowMrpLine, JGRowRateLine
+[Field: JGSheetRowAnchorFld]
+    Use    : Name Field
+    Set As : ""
+    Width  : 0
+    Skip   : Yes
+
+;; --------------------------------------------------------------------------
+;; Sticker cell — exactly 27.5 mm tall; all content stacked inside
+;; --------------------------------------------------------------------------
+
+[Part: JGStickerPart]
+    Lines    : JGStickerBarsLine, JGStickerAliasLine, JGStickerNameLine, JGStickerMrpLine, JGStickerRateLine
     Vertical : Yes
+    Height   : 27.5 mm
+    Space Top : 0 mm
 
-[Line: JGRowAliasLine]
+[Line: JGStickerBarsLine]
+    Fields : JGBars1Fld, JGBars2Fld, JGBars3Fld
+
+[Line: JGStickerAliasLine]
     Fields : JGAlias1Fld, JGAlias2Fld, JGAlias3Fld
 
-[Line: JGRowNameLine]
+[Line: JGStickerNameLine]
     Fields : JGName1Fld, JGName2Fld, JGName3Fld
 
-[Line: JGRowMrpLine]
+[Line: JGStickerMrpLine]
     Fields : JGMrp1Fld, JGMrp2Fld, JGMrp3Fld
 
-[Line: JGRowRateLine]
+[Line: JGStickerRateLine]
     Fields : JGRate1Fld, JGRate2Fld, JGRate3Fld
 
-;; ---- Column 1 ----
+;; --------------------------------------------------------------------------
+;; Column 1 — left sticker (66.5 mm)
+;; --------------------------------------------------------------------------
 
 [Field: JGBars1Fld]
     Use    : Name Field
     Set As : if $$IsEmpty:$A1 then "" else ("*" + $A1 + "*")
     Style  : JGLabelBarsStyle
-    Width  : 60 mm
+    Width  : 66.5 mm
     Align  : Centre
 
 [Field: JGAlias1Fld]
     Use    : Name Field
     Set As : $A1
     Style  : Tiny Bold
-    Width  : 60 mm
+    Width  : 66.5 mm
     Align  : Centre
 
 [Field: JGName1Fld]
     Use    : Name Field
     Set As : $$StringPart:$N1:0:24
     Style  : Tiny
-    Width  : 60 mm
+    Width  : 66.5 mm
     Align  : Centre
 
 [Field: JGMrp1Fld]
     Use    : Name Field
     Set As : if $$IsEmpty:$A1 then "" else ("MRP : " + $M1)
     Style  : Tiny
-    Width  : 60 mm
+    Width  : 66.5 mm
     Align  : Centre
 
 [Field: JGRate1Fld]
     Use    : Name Field
     Set As : if $$IsEmpty:$A1 then "" else ("Rate : " + $R1)
     Style  : Tiny
-    Width  : 60 mm
+    Width  : 66.5 mm
     Align  : Centre
 
-;; ---- Column 2 ----
+;; --------------------------------------------------------------------------
+;; Column 2 — middle sticker (66.5 mm + 1.5 mm gap)
+;; --------------------------------------------------------------------------
 
 [Field: JGBars2Fld]
     Use        : Name Field
     Set As     : if $$IsEmpty:$A2 then "" else ("*" + $A2 + "*")
     Style      : JGLabelBarsStyle
-    Width      : 60 mm
+    Width      : 66.5 mm
     Align      : Centre
-    Space Left : 3 mm
+    Space Left : 1.5 mm
 
 [Field: JGAlias2Fld]
     Use        : Name Field
     Set As     : $A2
     Style      : Tiny Bold
-    Width      : 60 mm
+    Width      : 66.5 mm
     Align      : Centre
-    Space Left : 3 mm
+    Space Left : 1.5 mm
 
 [Field: JGName2Fld]
     Use        : Name Field
     Set As     : $$StringPart:$N2:0:24
     Style      : Tiny
-    Width      : 60 mm
+    Width      : 66.5 mm
     Align      : Centre
-    Space Left : 3 mm
+    Space Left : 1.5 mm
 
 [Field: JGMrp2Fld]
     Use        : Name Field
     Set As     : if $$IsEmpty:$A2 then "" else ("MRP : " + $M2)
     Style      : Tiny
-    Width      : 60 mm
+    Width      : 66.5 mm
     Align      : Centre
-    Space Left : 3 mm
+    Space Left : 1.5 mm
 
 [Field: JGRate2Fld]
     Use        : Name Field
     Set As     : if $$IsEmpty:$A2 then "" else ("Rate : " + $R2)
     Style      : Tiny
-    Width      : 60 mm
+    Width      : 66.5 mm
     Align      : Centre
-    Space Left : 3 mm
+    Space Left : 1.5 mm
 
-;; ---- Column 3 ----
+;; --------------------------------------------------------------------------
+;; Column 3 — right sticker (66.5 mm + 1.5 mm gap)
+;; --------------------------------------------------------------------------
 
 [Field: JGBars3Fld]
     Use        : Name Field
     Set As     : if $$IsEmpty:$A3 then "" else ("*" + $A3 + "*")
     Style      : JGLabelBarsStyle
-    Width      : 60 mm
+    Width      : 66.5 mm
     Align      : Centre
-    Space Left : 3 mm
+    Space Left : 1.5 mm
 
 [Field: JGAlias3Fld]
     Use        : Name Field
     Set As     : $A3
     Style      : Tiny Bold
-    Width      : 60 mm
+    Width      : 66.5 mm
     Align      : Centre
-    Space Left : 3 mm
+    Space Left : 1.5 mm
 
 [Field: JGName3Fld]
     Use        : Name Field
     Set As     : $$StringPart:$N3:0:24
     Style      : Tiny
-    Width      : 60 mm
+    Width      : 66.5 mm
     Align      : Centre
-    Space Left : 3 mm
+    Space Left : 1.5 mm
 
 [Field: JGMrp3Fld]
     Use        : Name Field
     Set As     : if $$IsEmpty:$A3 then "" else ("MRP : " + $M3)
     Style      : Tiny
-    Width      : 60 mm
+    Width      : 66.5 mm
     Align      : Centre
-    Space Left : 3 mm
+    Space Left : 1.5 mm
 
 [Field: JGRate3Fld]
     Use        : Name Field
     Set As     : if $$IsEmpty:$A3 then "" else ("Rate : " + $R3)
     Style      : Tiny
-    Width      : 60 mm
+    Width      : 66.5 mm
     Align      : Centre
-    Space Left : 3 mm
+    Space Left : 1.5 mm

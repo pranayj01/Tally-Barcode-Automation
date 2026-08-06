@@ -9,7 +9,9 @@
 ;;
 ;; Print pipeline (NO Print Report inside the item loop):
 ;;   1. Clear JGLabelQueue
-;;   2. Walk Inventory Entries — enqueue each item $BilledQty times
+;;   2. Walk Inventory Entries — enqueue each item by INNER PACK count
+;;      (alternate / secondary qty, e.g. BOX), not primary pieces (PC).
+;;      60 PC with 1 BOX = 6 PC → 10 labels.
 ;;   3. Pack rows + Print Report : JGLabelReport   ← exactly once
 ;;
 ;; Never JGLabelsToPrint, never a quantity prompt.
@@ -90,9 +92,26 @@
     13 : Set Value : Name : ##Code
     14 : Accept Alter
 
+[Function: JGPurcLabelCountFromLine]
+    ;; Labels = alternate/secondary qty (BOX), not primary pieces (PC).
+    ;; FAQ 6201: $$String:<Qty>:Secondary → qty in alternate units.
+    ;; No alternate unit on the item → fall back to primary $$Number:$BilledQty.
+    Variable : Pack : Number
+    Variable : S    : String
+    01 : Set : S : $$String:$BilledQty:Secondary
+    02 : Set : Pack : $$Number:##S
+    03 : IF : ##Pack < 1
+    04 :   Set : Pack : $$Number:$BilledQty
+    05 : ENDIF
+    06 : IF : ##Pack < 1
+    07 :   Set : Pack : 1
+    08 : ENDIF
+    09 : RETURN : ##Pack
+
 [Function: JGPurcPrintLabelsFromQty]
     ;; Build the entire voucher label queue first, then print once.
     ;; Print Report is NEVER called inside the Inventory Entries walk.
+    ;; One sticker per inner pack (BOX), not per piece (PC).
     Variable : ItemName : String
     Variable : Qty      : Number
     Variable : Lines    : Number
@@ -104,26 +123,24 @@
     05 :   Set : ItemName : $StockItemName
     06 :   IF : NOT $$IsEmpty:##ItemName
     07 :     Set : Lines : ##Lines + 1
-    08 :     Set : Qty : $$Number:$BilledQty
-    09 :     IF : ##Qty < 1
-    10 :       Set : Qty : 1
-    11 :     ENDIF
-    12 :     Call : JGEnqueueItemLabels : ##ItemName : ##Qty
-    13 :     IF : $$LastResult
-    14 :       Set : Queued : ##Queued + 1
-    15 :     ENDIF
-    16 :   ENDIF
-    17 : End Walk
-    18 : IF : ##Lines < 1
-    19 :   MSG BOX : "Print Barcode Labels" : "No inventory entries found in this voucher."
-    20 :   RETURN : No
-    21 : ENDIF
-    22 : IF : ##Queued < 1 OR $$ListCount:JGLabelQueue < 1
-    23 :   MSG BOX : "Print Barcode Labels" : "No item in this voucher has a barcode alias yet."
-    24 :   RETURN : No
-    25 : ENDIF
-    26 : Call : JGPrintLabelQueue
-    27 : RETURN : $$LastResult
+    08 :     Call : JGPurcLabelCountFromLine
+    09 :     Set : Qty : $$LastResult
+    10 :     Call : JGEnqueueItemLabels : ##ItemName : ##Qty
+    11 :     IF : $$LastResult
+    12 :       Set : Queued : ##Queued + 1
+    13 :     ENDIF
+    14 :   ENDIF
+    15 : End Walk
+    16 : IF : ##Lines < 1
+    17 :   MSG BOX : "Print Barcode Labels" : "No inventory entries found in this voucher."
+    18 :   RETURN : No
+    19 : ENDIF
+    20 : IF : ##Queued < 1 OR $$ListCount:JGLabelQueue < 1
+    21 :   MSG BOX : "Print Barcode Labels" : "No item in this voucher has a barcode alias yet."
+    22 :   RETURN : No
+    23 : ENDIF
+    24 : Call : JGPrintLabelQueue
+    25 : RETURN : $$LastResult
 
 [Function: JGPurcPrintLabelsButton]
     ;; Workflow 3 — saved Purchase Voucher opened in Alter/Display.

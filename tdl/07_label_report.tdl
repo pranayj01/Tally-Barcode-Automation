@@ -9,7 +9,7 @@
 
 [Style: JGLabelBarsStyle]
     Font   : "Libre Barcode 39"
-    Height : 28
+    Height : 30
 
 ;; No Collection attribute here. A Report bound to a collection is generated
 ;; once per object in it, so the whole sheet repeated once per row (4 labels =
