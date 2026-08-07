@@ -1,48 +1,33 @@
-# Architecture — Native Tally plugin
+# Architecture
 
 ## Principle
 
-All runtime logic lives in **TDL inside TallyPrime**.
-
-No localhost server, no npm, no HTTP bridge.
+Runtime = **TDL inside TallyPrime** only. Barcode identity = Stock Item **Alias**.
 
 ```
-┌─────────────────────────────────────────┐
-│              TallyPrime                 │
-│  Stock Item UDFs  │  Company sequence   │
-│  Purchase events  │  Sales Alt+B scan   │
-│  Code128 encode   │  50x25 label report │
-└─────────────┬───────────────────────────┘
-              │ Windows print spooler
-              ▼
-     TSC / Zebra / XPrinter / TVS / any printer
+TallyPrime
+  ├── Alias generate / write (Purchase)
+  ├── Print queue (06)
+  └── Label report (07/08) → Libre Barcode 39 → Windows printer
 ```
 
 ## Modules
 
-| Concern | Module |
+| Concern | File |
 |---|---|
-| Config | `Config.tdl` |
-| Sequence / no-reuse | `Sequence.tdl` |
-| Code128 | `Code128.tdl` |
-| Master fields | `StockItemFields.tdl` |
-| Purchase automation | `PurchaseEvents.tdl` |
-| POS scan | `SalesScan.tdl` |
-| Labels | `LabelPrint.tdl` |
-| Operator tools | `ToolsMenu.tdl` |
+| Sequence UDFs | `01_udf.tdl` |
+| Alias generation | `02_functions.tdl` |
+| Purchase automation | `04_purchase.tdl` |
+| Print engine | `06_print_engine.tdl` |
+| Label layout | `07_label_report.tdl` |
+| Templates | `08_templates.tdl` |
+| Diagnostics | `09_diagnostics.tdl` |
 
-## Data permanence
+## Removed (legacy)
 
-- Barcode stored on Stock Item (`JGBarcode`)
-- Encoded print string stored (`JGBarcodeEncoded`)
-- Sequence on Company (`JGNextSeq`, `JGHighestIssued`)
-- Field becomes inactive after assignment
+- `SalesScan.tdl` / Alt+B POS hooks  
+- `Code128.tdl` / Libre Barcode 128 encoder  
+- `BarcodeAddon.txt` and old fragment stack  
+- Node `services/` API  
 
-## Printing
-
-Labels are a normal Tally **Print Report** using a Code128 **font**.  
-Thermal printers are supported via their **Windows drivers** (same as printing invoices).
-
-## Optional Node API
-
-Deprecated for daily use. Archived under `optional/node-api` for sites that still want PDF generation over HTTP.
+Sales scanning uses Tally’s native item field + Alias.

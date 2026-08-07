@@ -2,8 +2,8 @@
 ;; 04_purchase.tdl — Purchase → Alias + on-demand label print
 ;;
 ;; On Purchase Form Accept:
-;;   Walk Inventory Entries — ensure Alias (never overwrite). No printing,
-;;   no prompt: saving a voucher must never interrupt the user.
+;;   Walk Inventory Entries — ensure Alias (never overwrite).
+;;   Series: Sachin Enterprises 1000000+ ; SHRI JAIN BABY STORE 5000000+
 ;;
 ;; Printing is always explicit — Ctrl+Alt+B on the voucher (create or alter).
 ;;
@@ -46,7 +46,7 @@
     09 : RETURN : ##Code
 
 [Function: JGPurcPad7]
-    ;; Zero-pad to 7 digits → 0000001
+    ;; Number → 7-digit string (1000000 stays 1000000)
     Parameter : pNum : Number
     Variable  : S : String
     Variable  : Need : Number
@@ -58,20 +58,28 @@
     06 : END WHILE
     07 : RETURN : ##S
 
+[Function: JGPurcCompanyStart]
+    ;; Sachin Enterprises → 1000000+ ; SHRI JAIN BABY STORE → 5000000+
+    01 : IF : ##SVCurrentCompany = "SHRI JAIN BABY STORE"
+    02 :   RETURN : 5000000
+    03 : ENDIF
+    04 : RETURN : 1000000
+
 [Function: JGPurcNextCode]
-    ;; Company JGNextSeq → padded code; bump counter
-    Variable : Seq : Number
-    Variable : Code : String
-    01 : Set : Seq : $$Number:$JGNextSeq:Company:##SVCurrentCompany
-    02 : IF : $$IsEmpty:$JGNextSeq:Company:##SVCurrentCompany OR ##Seq < 1
-    03 :   Set : Seq : 1
-    04 : ENDIF
-    05 : Call : JGPurcPad7 : ##Seq
-    06 : Set : Code : $$LastResult
-    07 : New Object : Company : ##SVCurrentCompany
-    08 : Set Value  : JGNextSeq : ##Seq + 1
-    09 : Accept Alter
-    10 : RETURN : ##Code
+    Variable : Seq   : Number
+    Variable : Start : Number
+    Variable : Code  : String
+    01 : Set : Start : $$JGPurcCompanyStart
+    02 : Set : Seq : $$Number:$JGNextSeq:Company:##SVCurrentCompany
+    03 : IF : $$IsEmpty:$JGNextSeq:Company:##SVCurrentCompany OR ##Seq < ##Start
+    04 :   Set : Seq : ##Start
+    05 : ENDIF
+    06 : Call : JGPurcPad7 : ##Seq
+    07 : Set : Code : $$LastResult
+    08 : New Object : Company : ##SVCurrentCompany
+    09 : Set Value  : JGNextSeq : ##Seq + 1
+    10 : Accept Alter
+    11 : RETURN : ##Code
 
 [Function: JGPurcSetAliasIfEmpty]
     Parameter : pItem : String

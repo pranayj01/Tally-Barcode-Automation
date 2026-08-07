@@ -1,105 +1,31 @@
-# Native TDL guide (no Node)
+# TDL modules
 
-Load **`tdl/BarcodeAddon.txt`** only.
+Load the numbered files under `tdl\`. Do not load removed legacy files (`BarcodeAddon.txt`, `SalesScan.tdl`, `Code128.tdl`, etc.).
 
----
+## `01_udf.tdl`
 
-## `BarcodeAddon.txt`
+Company sequence UDFs for Alias generation.
 
-Entry point. Includes all modules and adds **JG Barcode Tools** to Gateway.
+## `02_functions.tdl`
 
----
+Generate Alias strings (`{Initials}{YY}{7-digit}`). No UI.
 
-## `Config.tdl`
+## `04_purchase.tdl`
 
-| Setting | Meaning |
-|---|---|
-| `JGBarcodePrefix` | `JG` |
-| `JGBarcodePadLength` | `8` → `JG00000001` |
-| `JGBarcodeFontName` | Must match installed Windows font |
-| `JGAskPrintOnPurchase` | Prompt after purchase save |
+On Purchase accept: keep existing Alias, or generate and write `FirstAlias` if empty. Optional print prompt.
 
----
+## `06_print_engine.tdl`
 
-## `Sequence.tdl`
+Build print queue / payload (item, Alias, MRP, rate, copies).
 
-Company-level permanent counter.
+## `07_label_report.tdl`
 
-| Function | Role |
-|---|---|
-| `JG Ensure Company Sequence` | Init next seq = 1 |
-| `JG Allocate Next Barcode` | Issue next `JG########`, bump counter |
-| `JG Peek Next Barcode` | Show next without consuming |
-| `JG Pad Number` / `JG Format Internal Barcode` | Formatting |
+Single-label report. Bars via **Libre Barcode 39** (`*Alias*`).
 
-**Never-reuse:** counter never decreases; retired/deleted item codes stay skipped forever.
+## `08_templates.tdl`
 
----
+Label sheet / print templates used by the print engine.
 
-## `Code128.tdl`
+## `09_diagnostics.tdl`
 
-Pure TDL **Code 128 Subset B** encoder (not QR, not Code39).
-
-| Function | Role |
-|---|---|
-| `JG Code128 Encode Safe` | Start B + data + mod-103 checksum + Stop |
-| `JG Code128 Glyph From Value` | Map values to Libre Barcode 128 glyphs |
-| `JG Mod103` | Checksum helper |
-
-Encoded string is stored in Stock Item UDF `JGBarcodeEncoded` for printing.
-
----
-
-## `StockItemFields.tdl`
-
-Custom fields on Stock Item:
-
-Barcode, Manufacturer Barcode, Brand, Category, Size, Colour, HSN, GST, Purchase Rate, **MRP**, **Selling Rate**, Opening Qty, Assigned On.
-
-Internal barcode field locks after first assignment.
-
----
-
-## `PurchaseEvents.tdl`
-
-On Purchase voucher **Form Accept**:
-
-1. Walk inventory lines  
-2. Save manufacturer barcode if present  
-3. If barcode empty → allocate JG code + encode Code128  
-4. Queue labels (`Item|Qty~…`)  
-5. Query **Print Barcode Labels?**  
-6. Call native print  
-
----
-
-## `LabelPrint.tdl`
-
-Report `JG Barcode Label Report` — form **50 mm × 25 mm**:
-
-- Item name  
-- Brand  
-- Code128 bars (font)  
-- Barcode number  
-- MRP + Selling Rate  
-
-Prints through Tally’s normal Windows print dialog → works with TSC/Zebra/XPrinter/TVS **Windows drivers**.
-
-Also: reprint / batch print helpers.
-
----
-
-## `SalesScan.tdl`
-
-**Alt+B** on Sales voucher:
-
-1. Scan/type barcode  
-2. Resolve internal or manufacturer code  
-3. Insert inventory line, **Qty = 1**, selling rate if set  
-4. Operator presses Enter → normal Tally stock posting  
-
----
-
-## `ToolsMenu.tdl`
-
-Gateway tools: next sequence, reprint, search, batch print, font help.
+Peek / allocate test helpers (does not write Alias by itself).

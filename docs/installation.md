@@ -1,59 +1,41 @@
-# Native installation (no Node.js)
+# Native installation
 
 ## Requirements
 
 - TallyPrime (Windows)
-- This add-on’s `tdl\` folder
-- Font: **Libre Barcode 128** (see `fonts\README.md`)
-- Optional: Windows driver for your thermal printer (TSC / Zebra / XPrinter / TVS)
+- This add-on’s `tdl\` modules
+- Font: **Libre Barcode 39** (`fonts\LibreBarcode39-Regular.ttf`)
 
 ## Steps
 
-1. **Install font**  
-   Download and install `LibreBarcode128-Regular.ttf`, restart TallyPrime.
+1. **Install font** — double-click `LibreBarcode39-Regular.ttf` → Install → restart TallyPrime.
 
-2. **Load TDL**  
-   Gateway of Tally → **F1** → **TDL & Add-Ons** → select:
+2. **Load TDL** — Gateway → **F1** → **TDL & Add-Ons** → add each file:
 
-   `...\tallyprime-barcode-addon\tdl\BarcodeAddon.txt`
+   - `tdl\01_udf.tdl`
+   - `tdl\02_functions.tdl`
+   - `tdl\04_purchase.tdl`
+   - `tdl\06_print_engine.tdl`
+   - `tdl\07_label_report.tdl`
+   - `tdl\08_templates.tdl`
+   - `tdl\09_diagnostics.tdl`
 
-   This is a **single bundled file** (required). Do not load the `.tdl` fragments separately.
+3. **Purchase** — accept a Purchase voucher; empty Alias items get a generated Alias. Answer **Yes** to print labels if prompted.
 
-3. **Confirm menu**  
-   Gateway should show **JG Barcode Tools**.
+4. **Sales** — scan the Alias into the item field (native Tally). No separate SalesScan TDL.
 
-4. **Stock Item**  
-   Open any item — you should see Barcode, Manufacturer Barcode, MRP, Selling Rate, Brand, etc.
+## Sequence
 
-5. **Configure printer paper** (Windows)  
-   Add a form/paper size **50 mm × 25 mm** for your label printer, or pick the closest size at print time.
-
-6. **Test purchase**  
-   - Set MRP + Selling Rate on the item  
-   - Optional: Manufacturer Barcode  
-   - Create Purchase → Accept  
-   - Answer **Yes** to print labels  
-   - Stick labels and scan with **Alt+B** on Sales  
-
-## Sequence / never-reuse
-
-Company UDFs store:
+Company UDFs:
 
 - `JGNextSeq` — next number to issue  
 - `JGHighestIssued` — audit high-water mark  
-
-Numbers only increase. Deleting a stock item does **not** free its barcode.
+- `JGSequenceYear` — year-scoped counter  
 
 ## Troubleshooting
 
 | Issue | Fix |
 |---|---|
-| No “JG Barcode Tools” | TDL path wrong / not loaded for this company |
-| Bars look like weird text | Font not installed or name mismatch in `Config.tdl` |
-| Printer wrong size | Set 50×25 mm paper in Windows printer preferences |
-| Scan finds nothing | Confirm barcode saved on Stock Item; try Tools → Search |
-| TDL syntax error on load | Load `BarcodeAddon.txt` only (not individual files twice) |
-
-## Uninstall
-
-Remove the TDL path from TallyPrime Add-Ons. Stock Item UDF values remain in company data until you clear them.
+| Bars look like text | Install Libre Barcode 39 and restart Tally |
+| No print after Purchase | Confirm modules `04` + `06`–`08` are loaded |
+| TDL load error | Load only the numbered modules above |

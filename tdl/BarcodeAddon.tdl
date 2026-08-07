@@ -1,8 +1,0 @@
-;; Module sources live beside this file.
-;; For TallyPrime Local TDL, load the bundled file:
-;;   BarcodeAddon.txt
-;; (single file — do not use Include; empty [TDL] causes error T0005)
-
-;; Sources (edited separately, then re-bundled into BarcodeAddon.txt):
-;;   Config.tdl, Sequence.tdl, Code128.tdl, StockItemFields.tdl,
-;;   PurchaseEvents.tdl, SalesScan.tdl, LabelPrint.tdl, ToolsMenu.tdl
