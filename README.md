@@ -6,7 +6,8 @@ Native TDL only — barcode = Stock Item **Alias**. Labels print with **Libre Ba
 
 - Purchase save → ensure each item has an Alias (keep existing / generate if empty)
 - Print barcode labels (Alias + name + MRP + rate)
-- Sales: scan Alias natively in Tally (no Alt+B add-on)
+- Sales: scan Alias natively in Tally, or **Ctrl+Alt+I** Fast Item Entry
+- Fast Item Entry (Ctrl+Alt+I): scan/select + Enter, same item adds qty; Ctrl+A posts all lines
 
 ## Install
 
@@ -21,6 +22,7 @@ tdl/06_print_engine.tdl
 tdl/07_label_report.tdl
 tdl/08_templates.tdl
 tdl/09_diagnostics.tdl
+tdl/10_fast_item_entry.tdl
 ```
 
 ## Layout
@@ -34,6 +36,7 @@ tdl/
   07_label_report.tdl  Single label layout (Code39)
   08_templates.tdl     Sheet / templates
   09_diagnostics.tdl   Peek / allocate tests
+  10_fast_item_entry.tdl Fast scan/pick on Purchase & Sales
 fonts/                 Libre Barcode 39
 docs/                  Guides
 ```
@@ -43,3 +46,4 @@ docs/                  Guides
 - [Installation](docs/installation.md)
 - [TDL guide](docs/tdl-guide.md)
 - [Architecture](docs/architecture.md)
+

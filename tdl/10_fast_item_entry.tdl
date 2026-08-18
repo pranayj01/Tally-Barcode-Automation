@@ -1,0 +1,294 @@
+;; ============================================================================
+;; 10_fast_item_entry.tdl — Fast item pick for Purchase / Sales
+;;
+;; Ctrl+Alt+I on a Purchase / Sales voucher opens a scan window.
+;;   - Scan Alias (or pick from the table) + Enter → added with Qty 1
+;;   - Scan the same item again → Qty + 1
+;;   - Ctrl+A → collected lines are written into the CURRENT voucher
+;;   - Esc → cancel (nothing written)
+;;
+;; Not used on POS. Batch / godown allocation stays native Tally.
+;; ============================================================================
+
+[System: Variable]
+    JGFastParm      : String
+    JGFastScanBuf   : String
+    JGFastApplyOk   : Logical
+    List Variable   : JGFastPickList
+
+[Variable: JGFastParm]
+    Type    : String
+    Default : ""
+
+[Variable: JGFastScanBuf]
+    Type    : String
+    Default : ""
+
+[Variable: JGFastApplyOk]
+    Type    : Logical
+    Default : No
+
+[Variable: JGFastPickList]
+    Variable : ItemName : String
+    Variable : Qty      : Number
+
+[System: Formula]
+    JGFastResolveFilter : $Name = ##JGFastParm OR $FirstAlias = ##JGFastParm
+    JGFastIsInvVch      : $$IsSales:$VoucherTypeName OR $$IsPurchase:$VoucherTypeName
+    JGFastIsPOS         : $$IsEqual:$VoucherTypeName:"POS Invoice"
+
+[Collection: JG Fast Resolve Coll]
+    Type   : Stock Item
+    Filter : JGFastResolveFilter
+    Fetch  : Name, FirstAlias, BaseUnits
+
+;; ---- Voucher button ----
+
+[#Form: Voucher]
+    Add : Buttons : JG Fast Item Btn
+
+[Button: JG Fast Item Btn]
+    Title    : "Fast Item Entry"
+    Key      : Ctrl + Alt + I
+    Action   : Call : JG Fast Open
+    Inactive : NOT @@JGFastIsInvVch OR @@JGFastIsPOS
+
+;; ---- Picker screen ----
+
+[Report: JG Fast Item Report]
+    Form  : JG Fast Item Form
+    Title : "Fast Item Entry"
+    ;; Do not redeclare the JGFast* system variables here. A Report-level
+    ;; declaration creates a local scope: Ctrl+A would set the local ApplyOk,
+    ;; then JG Fast Open would see the unchanged system value and skip Apply.
+
+[Form: JG Fast Item Form]
+    Parts   : JG Fast Hint Part, JG Fast Scan Part, JG Fast List Part
+    Width   : 90
+    Height  : 30
+    Buttons : JG Fast Done Btn
+    On      : Form Accept : Yes : Call : JG Fast Mark Apply
+    ;; An On:Form Accept handler overrides Tally's default accept action.
+    ;; FAQ 9232 requires Form Accept to be stated explicitly afterwards.
+    On      : Form Accept : Yes : Form Accept
+
+[Button: JG Fast Done Btn]
+    Title    : "Apply (Ctrl+A)"
+    Key      : Ctrl + A
+    ;; Ordered multi-action syntax documented for Button/Key definitions.
+    ;; Guard first so accepting the active scan field cannot add it again.
+    ActionEx : Guard  : Set : JGFastApplyOk : Yes
+    ActionEx : Accept : Form Accept
+
+;; --- hint ---
+[Part: JG Fast Hint Part]
+    Lines    : JG Fast Hint Line
+    Vertical : Yes
+
+[Line: JG Fast Hint Line]
+    Fields : JG Fast Hint Fld
+
+[Field: JG Fast Hint Fld]
+    Use        : Name Field
+    Set Always : Yes
+    Set As     : $$String:$$ListCount:JGFastPickList + " item(s). Scan + Enter to add. Ctrl+A writes them on the voucher."
+    Width      : 88
+    Skip       : Yes
+    Style      : Normal Bold
+
+;; --- scan input ---
+[Part: JG Fast Scan Part]
+    Lines    : JG Fast Scan Line
+    Vertical : Yes
+
+[Line: JG Fast Scan Line]
+    Fields : JG Fast Scan Lbl, JG Fast Scan Fld, JG Fast Scan Stay
+
+[Field: JG Fast Scan Lbl]
+    Use    : Name Field
+    Set As : "Item / Barcode"
+    Width  : 16
+    Skip   : Yes
+
+[Field: JG Fast Scan Fld]
+    Use        : Name Field
+    Table      : Stock Item
+    Show Table : Always
+    Set As     : ##JGFastScanBuf
+    Set Always : Yes
+    Modifies   : JGFastScanBuf : Yes
+    Width      : 50
+    ;; Ctrl+A accepts the active field before accepting the form. Do not add
+    ;; the current item again when the Apply button is already running.
+    On         : Accept : ##JGFastApplyOk = No : Call : JG Fast Add Scan
+    ;; Reset the field's edit buffer as well as JGFastScanBuf. Merely setting
+    ;; the variable to "" leaves the accepted item visible, so the scanner
+    ;; appends the next barcode and Tally reports a spelling error.
+    On         : Accept : ##JGFastApplyOk = No : Field Erase
+
+[Field: JG Fast Scan Stay]
+    Use       : Short Name Field
+    Set As    : ""
+    Width     : 1
+    Invisible : Yes
+    Skip      : No
+    On        : Focus : Yes : Field : JG Fast Scan Fld
+
+;; --- collected list ---
+;; Official context-free Repeat pattern:
+;;   Repeat : <Line>       (no collection)
+;;   Set    : <count>
+;; $$Line is the current list index.
+[Part: JG Fast List Part]
+    Lines    : JG Fast List Head, JG Fast List Line
+    Repeat   : JG Fast List Line
+    Set      : $$ListCount:JGFastPickList
+    Set Always : Yes
+    Vertical : Yes
+    Scroll   : Vertical
+
+[Line: JG Fast List Head]
+    Fields : JG Fast Head Item, JG Fast Head Qty
+    Border : Thin Bottom
+
+[Field: JG Fast Head Item]
+    Use    : Name Field
+    Set As : "Stock Item"
+    Width  : 66
+    Skip   : Yes
+    Style  : Normal Bold
+
+[Field: JG Fast Head Qty]
+    Use    : Name Field
+    Set As : "Qty"
+    Width  : 12
+    Align  : Right
+    Skip   : Yes
+    Style  : Normal Bold
+
+[Line: JG Fast List Line]
+    Fields : JG Fast Line Item, JG Fast Line Qty
+
+[Field: JG Fast Line Item]
+    Use        : Name Field
+    Set Always : Yes
+    Set As     : ##JGFastPickList[$$Line].ItemName
+    Width      : 66
+    Skip       : Yes
+
+[Field: JG Fast Line Qty]
+    Use        : Name Field
+    Set Always : Yes
+    Set As     : $$String:##JGFastPickList[$$Line].Qty
+    Width      : 12
+    Align      : Right
+    Skip       : Yes
+
+;; ---- Functions ----
+
+[Function: JG Fast Mark Apply]
+    01 : Set : JGFastApplyOk : Yes
+    02 : RETURN : Yes
+
+[Function: JG Fast Open]
+    ;; START/END BLOCK keeps the voucher as current+target object across Create.
+    ;; Without this, Insert Collection Object writes nowhere.
+    01 : LIST DELETE EX : JGFastPickList
+    02 : Set : JGFastScanBuf : ""
+    03 : Set : JGFastApplyOk : No
+    04 : START BLOCK
+    05 :   Create : JG Fast Item Report
+    06 : END BLOCK
+    07 : IF : ##JGFastApplyOk = No OR $$ListCount:JGFastPickList < 1
+    08 :   RETURN : No
+    09 : ENDIF
+    10 : SET TARGET
+    11 : Call : JG Fast Apply To Voucher
+    12 : RETURN : $$LastResult
+
+[Function: JG Fast Add Scan]
+    Variable : Scan  : String
+    Variable : Item  : String
+    Variable : Found : Logical
+    Variable : I     : Number
+    Variable : NewQ  : Number
+    01 : Set : Scan : $$Value
+    02 : IF : $$IsEmpty:##Scan
+    03 :   Set : Scan : ##JGFastScanBuf
+    04 : ENDIF
+    05 : IF : $$IsEmpty:##Scan
+    06 :   RETURN : No
+    07 : ENDIF
+    08 : Set : JGFastParm : ##Scan
+    09 : Set : Item : ""
+    10 : Walk Collection : JG Fast Resolve Coll
+    11 :   Set : Item : $Name
+    12 : End Walk
+    13 : IF : $$IsEmpty:##Item
+    14 :   MSG BOX : "Fast Item Entry" : "No stock item for: " + ##Scan
+    15 :   Set : JGFastScanBuf : ""
+    16 :   RETURN : No
+    17 : ENDIF
+    18 : START SUB
+    19 :   Set : Found : No
+    20 :   Set : I : 1
+    21 :   WHILE : ##I <= $$ListCount:JGFastPickList
+    22 :     IF : ##JGFastPickList[##I].ItemName = ##Item
+    23 :       Set : NewQ : ##JGFastPickList[##I].Qty + 1
+    24 :       MULTI SET : JGFastPickList[##I] : Qty : ##NewQ
+    25 :       Set : Found : Yes
+    26 :     ENDIF
+    27 :     Set : I : ##I + 1
+    28 :   END WHILE
+    29 :   IF : ##Found = No
+    30 :     LIST ADD EX : JGFastPickList
+    31 :     Set : I : $$ListCount:JGFastPickList
+    32 :     MULTI SET : JGFastPickList[##I] : ItemName : ##Item, Qty : 1
+    33 :   ENDIF
+    34 :   Set : JGFastScanBuf : ""
+    35 : END SUB
+    36 : RETURN : Yes
+
+[Function: JG Fast Apply To Voucher]
+    ;; Voucher is current/target (restored by JG Fast Open).
+    ;; FAQ 6710: reuse the empty first Inventory Entries row if present.
+    Variable : I          : Number
+    Variable : Item       : String
+    Variable : Qty        : Number
+    Variable : Unit       : String
+    Variable : QtyS       : String
+    Variable : FirstEmpty : Logical
+    Variable : Added      : Number
+    ;; Formula collection name is InventoryEntries (no space). The spaced
+    ;; spelling is valid only for the INSERT COLLECTION OBJECT action.
+    01 : Set : FirstEmpty : $$IsEmpty:$$CollectionField:$StockItemName:1:InventoryEntries
+    02 : Set : Added : 0
+    03 : Set : I : 1
+    04 : WHILE : ##I <= $$ListCount:JGFastPickList
+    05 :   Set : Item : ##JGFastPickList[##I].ItemName
+    06 :   Set : Qty : ##JGFastPickList[##I].Qty
+    07 :   IF : NOT $$IsEmpty:##Item AND ##Qty >= 1
+    08 :     Set : Unit : $BaseUnits:StockItem:##Item
+    09 :     IF : $$IsEmpty:##Unit
+    10 :       Set : QtyS : $$String:##Qty
+    11 :     ELSE
+    12 :       Set : QtyS : $$String:##Qty + " " + ##Unit
+    13 :     ENDIF
+    14 :     IF : ##Added = 0 AND ##FirstEmpty
+    15 :       SET TARGET : Inventory Entries[1]
+    16 :     ELSE
+    17 :       INSERT COLLECTION OBJECT : Inventory Entries
+    18 :     ENDIF
+    19 :     SET VALUE : StockItemName : ##Item
+    20 :     START BLOCK
+    21 :       SET OBJECT
+    22 :       SET VALUE : BilledQty : $$AsQty:##QtyS
+    23 :       SET VALUE : ActualQty : $$AsQty:##QtyS
+    24 :     END BLOCK
+    25 :     SET TARGET : ..
+    26 :     Set : Added : ##Added + 1
+    27 :   ENDIF
+    28 :   Set : I : ##I + 1
+    29 : END WHILE
+    30 : MSG BOX : "Fast Item Entry" : $$String:##Added + " line(s) added to this voucher."
+    31 : RETURN : Yes

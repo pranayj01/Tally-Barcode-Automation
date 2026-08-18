@@ -19,10 +19,11 @@
    - `tdl\07_label_report.tdl`
    - `tdl\08_templates.tdl`
    - `tdl\09_diagnostics.tdl`
+   - `tdl\10_fast_item_entry.tdl`
 
 3. **Purchase** — accept a Purchase voucher; empty Alias items get a generated Alias. Answer **Yes** to print labels if prompted.
 
-4. **Sales** — scan the Alias into the item field (native Tally). No separate SalesScan TDL.
+4. **Sales / Purchase fast entry** — on the voucher press **Ctrl+Alt+I**. In the scan window: scan the Alias (or pick from the item table) and press Enter — repeat as needed; the same item scanned again adds +1 qty. Press **Ctrl+A** to apply — all lines are written into the voucher. Esc cancels. Not used on POS.
 
 ## Sequence
 
@@ -39,3 +40,4 @@ Company UDFs:
 | Bars look like text | Install Libre Barcode 39 and restart Tally |
 | No print after Purchase | Confirm modules `04` + `06`–`08` are loaded |
 | TDL load error | Load only the numbered modules above |
+

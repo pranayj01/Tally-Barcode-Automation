@@ -29,3 +29,8 @@ Label sheet / print templates used by the print engine.
 ## `09_diagnostics.tdl`
 
 Peek / allocate test helpers (does not write Alias by itself).
+
+## `10_fast_item_entry.tdl`
+
+Purchase / Sales **Ctrl+Alt+I** scan window: scan Alias + Enter (duplicate scans add qty), Ctrl+A posts inventory lines.
+

@@ -22,6 +22,7 @@ TallyPrime
 | Label layout | `07_label_report.tdl` |
 | Templates | `08_templates.tdl` |
 | Diagnostics | `09_diagnostics.tdl` |
+| Fast item entry | `10_fast_item_entry.tdl` |
 
 ## Removed (legacy)
 
