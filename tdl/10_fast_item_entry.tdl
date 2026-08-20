@@ -7,12 +7,15 @@
 ;;   - Ctrl+A → collected lines are written into the CURRENT voucher
 ;;   - Esc → cancel (nothing written)
 ;;
-;; Not used on POS. Batch / godown allocation stays native Tally.
+;; Godown is selected once on the scan window (same step Tally asks for after
+;; an item). Rate = Stock Item StandardPrice; MRP = item MRP details.
 ;; ============================================================================
 
 [System: Variable]
     JGFastParm      : String
     JGFastScanBuf   : String
+    JGFastGodown    : String
+    JGFastGodownLocked : Logical
     JGFastApplyOk   : Logical
     List Variable   : JGFastPickList
 
@@ -23,6 +26,14 @@
 [Variable: JGFastScanBuf]
     Type    : String
     Default : ""
+
+[Variable: JGFastGodown]
+    Type    : String
+    Default : "Main Location"
+
+[Variable: JGFastGodownLocked]
+    Type    : Logical
+    Default : No
 
 [Variable: JGFastApplyOk]
     Type    : Logical
@@ -40,7 +51,7 @@
 [Collection: JG Fast Resolve Coll]
     Type   : Stock Item
     Filter : JGFastResolveFilter
-    Fetch  : Name, FirstAlias, BaseUnits
+    Fetch  : Name, FirstAlias, BaseUnits, StandardPrice
 
 ;; ---- Voucher button ----
 
@@ -63,7 +74,7 @@
     ;; then JG Fast Open would see the unchanged system value and skip Apply.
 
 [Form: JG Fast Item Form]
-    Parts   : JG Fast Hint Part, JG Fast Scan Part, JG Fast List Part
+    Parts   : JG Fast Hint Part, JG Fast Godown Part, JG Fast Scan Part, JG Fast List Part
     Width   : 90
     Height  : 30
     Buttons : JG Fast Done Btn
@@ -91,10 +102,39 @@
 [Field: JG Fast Hint Fld]
     Use        : Name Field
     Set Always : Yes
-    Set As     : $$String:$$ListCount:JGFastPickList + " item(s). Scan + Enter to add. Ctrl+A writes them on the voucher."
+    Set As     : $$String:$$ListCount:JGFastPickList + " item(s). Pick Godown once, scan + Enter, Ctrl+A applies."
     Width      : 88
     Skip       : Yes
     Style      : Normal Bold
+
+;; --- godown (once per session; Tally fills Rate/MRP only after this) ---
+[Part: JG Fast Godown Part]
+    Lines    : JG Fast Godown Line
+    Vertical : Yes
+
+[Line: JG Fast Godown Line]
+    Fields : JG Fast Godown Lbl, JG Fast Godown Fld
+
+[Field: JG Fast Godown Lbl]
+    Use    : Name Field
+    Set As : "Godown"
+    Width  : 16
+    Skip   : Yes
+
+[Field: JG Fast Godown Fld]
+    Use        : Name Field
+    Table      : Godown
+    Show Table : Always
+    Set As     : ##JGFastGodown
+    Set Always : Yes
+    Modifies   : JGFastGodown : Yes
+    ;; Select once. After acceptance this field is skipped during every form
+    ;; regeneration, making Item / Barcode the first editable field.
+    Skip       : ##JGFastGodownLocked
+    Width      : 50
+    On         : Accept : Yes : Set : JGFastGodownLocked : Yes
+    ;; On:Accept overrides Tally's default, so accept explicitly (FAQ).
+    On         : Accept : Yes : Field Accept
 
 ;; --- scan input ---
 [Part: JG Fast Scan Part]
@@ -118,13 +158,13 @@
     Set Always : Yes
     Modifies   : JGFastScanBuf : Yes
     Width      : 50
-    ;; Ctrl+A accepts the active field before accepting the form. Do not add
-    ;; the current item again when the Apply button is already running.
+    ;; Keep each action separate. Chaining after CALL passes those tokens as
+    ;; function parameters instead of executing additional field actions.
     On         : Accept : ##JGFastApplyOk = No : Call : JG Fast Add Scan
-    ;; Reset the field's edit buffer as well as JGFastScanBuf. Merely setting
-    ;; the variable to "" leaves the accepted item visible, so the scanner
-    ;; appends the next barcode and Tally reports a spelling error.
     On         : Accept : ##JGFastApplyOk = No : Field Erase
+    ;; On:Accept overrides Tally's default, so accept explicitly (FAQ).
+    ;; Cursor reaches the parking field below, which redirects to scan.
+    On         : Accept : ##JGFastApplyOk = No : Field Accept
 
 [Field: JG Fast Scan Stay]
     Use       : Short Name Field
@@ -196,15 +236,19 @@
     01 : LIST DELETE EX : JGFastPickList
     02 : Set : JGFastScanBuf : ""
     03 : Set : JGFastApplyOk : No
-    04 : START BLOCK
-    05 :   Create : JG Fast Item Report
-    06 : END BLOCK
-    07 : IF : ##JGFastApplyOk = No OR $$ListCount:JGFastPickList < 1
-    08 :   RETURN : No
-    09 : ENDIF
-    10 : SET TARGET
-    11 : Call : JG Fast Apply To Voucher
-    12 : RETURN : $$LastResult
+    04 : Set : JGFastGodownLocked : No
+    05 : IF : $$IsEmpty:##JGFastGodown
+    06 :   Set : JGFastGodown : "Main Location"
+    07 : ENDIF
+    08 : START BLOCK
+    09 :   Create : JG Fast Item Report
+    10 : END BLOCK
+    11 : IF : ##JGFastApplyOk = No OR $$ListCount:JGFastPickList < 1
+    12 :   RETURN : No
+    13 : ENDIF
+    14 : SET TARGET
+    15 : Call : JG Fast Apply To Voucher
+    16 : RETURN : $$LastResult
 
 [Function: JG Fast Add Scan]
     Variable : Scan  : String
@@ -252,43 +296,87 @@
 [Function: JG Fast Apply To Voucher]
     ;; Voucher is current/target (restored by JG Fast Open).
     ;; FAQ 6710: reuse the empty first Inventory Entries row if present.
+    ;; Rate/MRP fill in Tally only after godown allocation (Batch Allocations).
     Variable : I          : Number
     Variable : Item       : String
     Variable : Qty        : Number
     Variable : Unit       : String
     Variable : QtyS       : String
+    Variable : RateS      : String
+    Variable : MrpS       : String
+    Variable : Godown     : String
     Variable : FirstEmpty : Logical
     Variable : Added      : Number
+    01 : Set : Godown : ##JGFastGodown
+    02 : IF : $$IsEmpty:##Godown
+    03 :   Set : Godown : "Main Location"
+    04 : ENDIF
     ;; Formula collection name is InventoryEntries (no space). The spaced
     ;; spelling is valid only for the INSERT COLLECTION OBJECT action.
-    01 : Set : FirstEmpty : $$IsEmpty:$$CollectionField:$StockItemName:1:InventoryEntries
-    02 : Set : Added : 0
-    03 : Set : I : 1
-    04 : WHILE : ##I <= $$ListCount:JGFastPickList
-    05 :   Set : Item : ##JGFastPickList[##I].ItemName
-    06 :   Set : Qty : ##JGFastPickList[##I].Qty
-    07 :   IF : NOT $$IsEmpty:##Item AND ##Qty >= 1
-    08 :     Set : Unit : $BaseUnits:StockItem:##Item
-    09 :     IF : $$IsEmpty:##Unit
-    10 :       Set : QtyS : $$String:##Qty
-    11 :     ELSE
-    12 :       Set : QtyS : $$String:##Qty + " " + ##Unit
-    13 :     ENDIF
-    14 :     IF : ##Added = 0 AND ##FirstEmpty
-    15 :       SET TARGET : Inventory Entries[1]
-    16 :     ELSE
-    17 :       INSERT COLLECTION OBJECT : Inventory Entries
-    18 :     ENDIF
-    19 :     SET VALUE : StockItemName : ##Item
-    20 :     START BLOCK
-    21 :       SET OBJECT
-    22 :       SET VALUE : BilledQty : $$AsQty:##QtyS
-    23 :       SET VALUE : ActualQty : $$AsQty:##QtyS
-    24 :     END BLOCK
-    25 :     SET TARGET : ..
-    26 :     Set : Added : ##Added + 1
-    27 :   ENDIF
-    28 :   Set : I : ##I + 1
-    29 : END WHILE
-    30 : MSG BOX : "Fast Item Entry" : $$String:##Added + " line(s) added to this voucher."
-    31 : RETURN : Yes
+    05 : Set : FirstEmpty : $$IsEmpty:$$CollectionField:$StockItemName:1:InventoryEntries
+    06 : Set : Added : 0
+    07 : Set : I : 1
+    08 : WHILE : ##I <= $$ListCount:JGFastPickList
+    09 :   Set : Item : ##JGFastPickList[##I].ItemName
+    10 :   Set : Qty : ##JGFastPickList[##I].Qty
+    11 :   IF : NOT $$IsEmpty:##Item AND ##Qty >= 1
+    12 :     Set : JGFastParm : ##Item
+    13 :     Set : Unit : ""
+    14 :     Set : RateS : ""
+    15 :     Set : MrpS : ""
+    16 :     Walk Collection : JG Fast Resolve Coll
+    17 :       Set : Unit : $BaseUnits
+    18 :       Set : RateS : $$String:$StandardPrice
+    19 :       Set : MrpS : $$String:$MRPDetails[Last].MRPRateDetails[Last].MRPRate
+    20 :     End Walk
+    21 :     IF : $$IsEmpty:##Unit
+    22 :       Set : Unit : $BaseUnits:StockItem:##Item
+    23 :     ENDIF
+    24 :     IF : $$IsEmpty:##RateS
+    25 :       Set : RateS : $$String:$StandardPrice:StockItem:##Item
+    26 :     ENDIF
+    27 :     IF : $$IsEmpty:##Unit
+    28 :       Set : QtyS : $$String:##Qty
+    29 :     ELSE
+    30 :       Set : QtyS : $$String:##Qty + " " + ##Unit
+    31 :     ENDIF
+    32 :     IF : ##Added = 0 AND ##FirstEmpty
+    33 :       SET TARGET : Inventory Entries[1]
+    34 :     ELSE
+    35 :       INSERT COLLECTION OBJECT : Inventory Entries
+    36 :     ENDIF
+    37 :     SET VALUE : StockItemName : ##Item
+    38 :     START BLOCK
+    39 :       SET OBJECT
+    40 :       SET VALUE : BilledQty : $$AsQty:##QtyS
+    41 :       SET VALUE : ActualQty : $$AsQty:##QtyS
+    42 :       IF : NOT $$IsEmpty:##RateS
+    43 :         SET VALUE : Rate : $$AsRate:##RateS
+    44 :       ENDIF
+    45 :       IF : NOT $$IsEmpty:##MrpS
+    46 :         SET VALUE : MRPRate : $$AsRate:##MrpS
+    47 :       ENDIF
+    48 :     END BLOCK
+    49 :     IF : $$IsEmpty:$$CollectionField:$GodownName:1:BatchAllocations
+    50 :       SET TARGET : Batch Allocations[1]
+    51 :     ELSE
+    52 :       INSERT COLLECTION OBJECT : Batch Allocations
+    53 :     ENDIF
+    54 :     SET VALUE : GodownName : ##Godown
+    55 :     SET VALUE : BatchName : "Primary Batch"
+    56 :     START BLOCK
+    57 :       SET OBJECT
+    58 :       SET VALUE : BilledQty : $$AsQty:##QtyS
+    59 :       SET VALUE : ActualQty : $$AsQty:##QtyS
+    60 :       IF : NOT $$IsEmpty:##RateS
+    61 :         SET VALUE : Rate : $$AsRate:##RateS
+    62 :       ENDIF
+    63 :     END BLOCK
+    64 :     SET TARGET : ..
+    65 :     SET TARGET : ..
+    66 :     Set : Added : ##Added + 1
+    67 :   ENDIF
+    68 :   Set : I : ##I + 1
+    69 : END WHILE
+    70 : MSG BOX : "Fast Item Entry" : $$String:##Added + " line(s) added to this voucher."
+    71 : RETURN : Yes
